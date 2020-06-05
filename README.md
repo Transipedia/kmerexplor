@@ -47,7 +47,7 @@ or by cloning repository:
 git clone https://github.com/Transipedia/kmerexplor.git
 
 # create link somewhere in your PATH
-sudo ln -s $PWD/kmerexplor/kmerexpor/core.py /usr/local/bin/kmerexplor
+sudo ln -s $PWD/kmerexplor/kmerexplor/core.py /usr/local/bin/kmerexplor
 ```
 
 

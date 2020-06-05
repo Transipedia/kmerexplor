@@ -1,0 +1,11 @@
+# include *.md *.yaml
+
+# include all files in lib directory
+graft kmerexplor
+
+# exclude all files in directory
+prune kmerexplor-results
+
+# exclude files anywere
+global-exclude __pycache__
+global-exclude *.py[co]

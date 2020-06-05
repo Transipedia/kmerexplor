@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+dist/
+build/
+*.egg-info/
+.pypirc
+
+
+# kmerexplor results
+kmerexplor-results/

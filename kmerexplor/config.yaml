@@ -1,0 +1,126 @@
+
+Basic_features:   # Meta category, show in left sidenav (underscores are replaced by blank)
+  Histones:       # Must match with first item (characters before first dash) of the second column
+                  # in the tabuled index file. Also, they will be used for Javascript function names.
+                  # They must be unique, and contain uniquely letters, digits and underscores
+    sidenav : Poly A / Ribo D
+                  # Show in the left sidebar
+    title: Poly A and Ribo depletion by Histone detection
+                  # Title of the graph
+    threshold: 350
+                  # BE CAREFULL : 0.005 is the minimum value (echartjs bug ?).
+                  # 2 values separated by commas are admitted (e.g. threshold: 120, -120).
+    chart_type: bar
+                  # Only bar is admitted at this time.
+    # as_percent: # decomment to show result as percentage.
+    chart_theme: light
+                  # light, dark, or nothing (default theme: nothing)
+    desc:         # More details on the graph, located under it
+      - Description of Poly A and Ribodepletion # first line is a title
+      - A paragraph of explanations.
+      - Another paragraph.
+  Orientation:
+    sidenav: Orientation
+    title: Orientation
+    threshold: 230, -230
+    chart_type: bar
+    chart_theme: light
+    desc:
+      - Description of Orientation
+      - A paragraph of explanations.
+      - Another paragraph
+  Gender:
+    sidenav: Y chromosome
+    title: Y chromosome detection
+    threshold:
+    chart_type: bar
+    chart_theme: light
+    desc:
+      - Description of Y chromosome
+      - A paragraph of explanations.
+      - Another paragraph
+  Read_biases:
+    sidenav: Read position biases
+    title: Read position biases
+    threshold:
+    chart_type: bar
+    chart_theme: light
+    as_percent:
+    desc:
+      - Read position biases
+      - Nowadays thousands of RNA-seq data are available and could be used for metaanalysis. However to deal with data heterogeneity and the weaknesses of the RNAseq technology we need to filter data series for selecting the most homogeneous ones.
+      - Read coverage bias from 5' to 3' end can be one important parameter to analyse. Indeed if reads primarily accumulate at the 3’ end of transcripts in poly(A)-selected samples, this might indicate low RNA quality in the starting material (Conesa et al. Genome Biology 2016). From mapping process, tools for quality control in mapping are used including Picard, RSeQC and Qualimap. Here, to check with the uniformity of read coverage,  we selected and counted specific kmers from house keeping genes (see also orientation section selection) and distinguished the kmer counting mean from  5', 3' and CDS regions for those genes. The result are presented for each sample with the cumulated mean of each region.  In absence of a biais, one expected a conserved proportion of the corresponding region among samples, conversely, if a bias is present in the data this proportion will be lost.
+
+Contamination:
+  HeLa_HPV18:
+    sidenav: HeLa
+    title: Hela HPV18
+    threshold: 10
+    chart_type: bar
+    chart_theme: light
+    desc:
+      - Description of Hela HPV18
+      - A paragraph of explanations.
+      - Another paragraph
+  Mycoplasma:
+    sidenav: Mycoplasma
+    title: Mycoplasma
+    threshold: 10
+    chart_type: bar
+    chart_theme: light
+    desc:
+      - Description of Mycoplasma
+      - A paragraph of explanations.
+      - Another paragraph
+  Virus_genome:
+    sidenav: Virus
+    title: Virus detection
+    threshold: 20
+    chart_type: bar
+    chart_theme: light
+    desc:
+      - Description of Virus_genome
+      - A paragraph of explanations.
+      - Another paragraph
+  Telomeres:
+    sidenav: Telomeres
+    title: Telomeres detection
+    threshold: 10
+    chart_type: bar
+    chart_theme: light
+    desc:
+      - Description of Telomeres
+      - A paragraph of explanations.
+      - Another paragraph
+  Specie:
+    sidenav: Species
+    title: Ensembl species
+    threshold: 0.1
+    chart_type: bar
+    chart_theme: light
+    desc:
+      - Description of Ensembl species
+      - A paragraph of explanations.
+      - Another paragraph
+
+Miscellaneous:
+  Chimera:
+    sidenav: Chimera
+    title: Chimera
+    threshold:
+    chart_type: bar
+    chart_theme: light
+    desc:
+      - Description of Chimera
+      - A paragraph of explanations.
+      - Another paragraph
+  #~ MSCLinc:
+    #~ sidenav: MSClinc
+    #~ title: MSClinc
+    #~ threshold: 120
+    #~ chart_type: bar
+    #~ chart_theme: light
+    #~ desc:
+      #~ - Description of MSCLinc
+      #~ - A paragraph of explanations.
+      #~ - Another paragraph

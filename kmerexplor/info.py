@@ -1,7 +1,7 @@
 # info.py
 
 APPNAME = "KmerExploR"
-SHORTDESC = "What else in these samples ?"
+SHORTDESC = "KmerExploR provides information of a requested RNA-seq dataset Set."
 LICENCE = "GPL3"
 VERSION = "0.4.2"
 AUTHOR = "Benoit Guibert"

@@ -16,7 +16,7 @@
 ## Description
 
 
-From a bunch of fastq or countTags output files, KmerExploR provides information on samples analyzed by NGS, such as gender, whether the analysis is based on oriented or non-oriented sequencing, whether mycoplasma is present, and much more.
+From a bunch of fastq or countTags output files, KmerExploR provides information of a requested RNA-seq dataset Set, such as gender, whether the analysis is based on oriented or non-oriented sequencing, whether mycoplasma is present, and much more.
 
 `KmerExploR` uses a set of reference kmers.
 

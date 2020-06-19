@@ -132,9 +132,10 @@ def usage():
     epilog += " %(prog)s -p path/to/*.fastq.gz\n"
     epilog += "\n # -c for multithreading, -k to keep counts (input must be fastq):\n"
     epilog += " %(prog)s -p -c 16 -k path/to/*.fastq.gz\n"
-    epilog += "\n # You can skip the count step thanks to countTags output (see -k option):\n"
+    epilog += "\n # You can skip the counting step thanks to countTags output (see -k option):\n"
     epilog += " %(prog)s -p path/to/countTags/files/*.tsv\n"
-    epilog += "\n # -o to choose a directory output, --title to show title in results:\n"
+    epilog += "\n # -o to choose your directory output (directory will be created),"
+    epilog += "\n # --title to show title in results:\n"
     epilog += " %(prog)s -p -o output_dir --title 'Title in html page dir/*.fastq.gz'\n"
     epilog += "\n # Advanced: use your own tag file and config.yaml file:\n"
     epilog += " %(prog)s -p -tags my_tags.tsv --config my_config.yaml dir/*.fast.gz\n"
@@ -155,58 +156,58 @@ def usage():
                         help='debug',
                        )
     parser.add_argument('-t', '--tags',
-                        help='tag file',
+                        help='tag file.',
                        )
     method.add_argument('-s', '--single',
                         action='store_true',
-                        help='when samples are single',
+                        help='when samples are single.',
                        )
     method.add_argument('-p', '--paired',
                         action='store_true',
-                        help='when samples are paired',
+                        help='when samples are paired.',
                        )
     parser.add_argument('-o', '--output',
                         default='./{}-results'.format(info.APPNAME.lower()),
-                        help='output directory (default: "./{}-results")'.format(info.APPNAME.lower()),
+                        help='output directory (default: "./{}-results").'.format(info.APPNAME.lower()),
                         metavar='output_dir',
                        )
     parser.add_argument('-k', '--keep-counts',
                         action='store_true',
-                        help='keep countTags outputs',
+                        help='keep countTags outputs.',
                        )
     parser.add_argument('--tmp-dir',
                         default='/tmp',
-                        help='Temporary files directory',
+                        help='Temporary files directory.',
                         metavar='tmp_dir',
                        )
     parser.add_argument('--scale',
                         default=1,
                         type=int,
-                        help='Scale factor, to avoid too small values of counts. (default: 1)',
+                        help='Scale factor, to avoid too small values of counts. (default: 1).',
                         metavar=('scale'),
                         )
     parser.add_argument('--config',
                         default='config.yaml',
-                        help='Configuration yaml file of each category (default: "lib/config.yaml")',
+                        help='Configuration yaml file of each category (default: built-in "config.yaml").',
                         metavar='config.yaml',
                        )
     parser.add_argument('--title',
                         default='',
-                        help='Title to be displayed in the html page',
+                        help='Title to be displayed in the html page.',
                        )
     parser.add_argument('-y', '--yes', '--assume-yes',
                         action='store_true',
-                        help='Assume yes to all prompt answers',
+                        help='Assume yes to all prompt answers.',
                        )
     parser.add_argument('-c', '--cores',
                         default=1,
                         type=int,
-                        help='Number of CPUs cores (default: 1). Valid especially when starting from fastq file.',
+                        help='Specifies the number of files which can be processed simultaneously by countTags. (default: 1). Valid when inputs are fastq file.',
                         metavar=('cores'),
                        )
     parser.add_argument('-v', '--version',
                         action='version',
-                        version='%(prog)s version: {}'.format(info.VERSION)
+                        version='%(prog)s version: {}.'.format(info.VERSION)
                        )
     ### Go to "usage()" without arguments or stdin
     if len(sys.argv) == 1 and sys.stdin.isatty():

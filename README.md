@@ -3,33 +3,44 @@
 
 - [Description](#description)
 - [Installation](#installation)
+	+ [Option 1: install with pip](#Option_1_install_KmerExploR_with_pip)
+	+ [Option 2: install with git](#Option_2_install_KmerExploR_with_git_by_cloning_repository)
 - [Input](#input)
 - [Output](#output)
 - [Examples](#examples)
 - [Usage](#usage)
 - [Options](#options)
-	- [-k --keep-counts](#k---keep-counts)
-	- [--tags tags_file](#tags-tags_file)
+	- [-k --keep-counts](#-k---keep-counts)
+	- [--tags tags_file](#--tags-tags_file)
 	- [--config config.yaml](#config-config.yaml)
 
 
 ## Description
 
 
-From a bunch of fastq or countTags output files, KmerExploR provides information of a requested RNA-seq dataset Set, such as gender, whether the analysis is based on oriented or non-oriented sequencing, whether mycoplasma is present, and much more.
+From a bunch of fastq or countTags output files, KmerExploR provides information on RNA-sequencing datasets :
 
-`KmerExploR` uses a set of reference kmers.
+- wether the analysis is based on poly-A selection protocol or ribo-depletion,
+- whether the analysis is based on oriented or non-oriented sequencing, 
+- gender, 
+- whether there is a read coverage bias from 5' to 3' 	long transcripts
+- wether the data are contamined by HeLa, mycoplasma is present or not, or other viruses such as hepatitis B virus
+- specie
 
-We will generally use the existing kmer set. But it is also possible to create your own kmers reference file, for example for a search on a particular species.
+`KmerExploR` uses a set of reference specific kmers designed with Kmerator (https://github.com/Transipedia/kmerator).
+
+For general usage, we will use the provided set of kmers. Howerver, it is also possible to create your own kmers reference file to have specific informations on you samples such as request on a particular specie.
 
 This code is under **GPL3** licence.
 
 
 ## Installation
 
-`KmerExploR` needs `yaml` python module, `pip` automatically install it, not `git`. 
+`KmerExploR` needs `yaml` python module,
+We recommand tu use ``pip` as it install everything you need automatically.
 
-You may install kmerexplor with pip: 
+### Option 1: install KmerExploR with pip
+
 
 ```
 # as user
@@ -38,9 +49,9 @@ python3 -m pip install --user kmerexplor
 # as root or in virtualenv
 python3 -m pip install kmerexplor
 ```
-**Nota**: using pip as user without virtual environment, make sure PATH variable include `~/.local/bin`.
+**Nota**: using pip as user without virtual environment, make sure your PATH variable include `~/.local/bin`.
 
-or by cloning repository:
+### Option 2: install KmerExploR with git by cloning repository
 
 ```
 # clone the repository
@@ -75,41 +86,20 @@ By default, outputs are produced in directory `kmerexplor-results`.
 
 - `table.tsv` : tab separated table of results.
 - `kmerexplor.html` : graphical results.
-- `lib` directory contains css and javascript code associated with KmerExploR.html
+- `lib` directory contains css and javascript code associated with `kmerexplor.html`.
 - if `--keep-counts` option is specified `countTags` directory contains __countTags__ output. 
 
-
-## Examples:
-
-Mandatory: `-p` for paired-end or `-s` for single:
-
 ```
-kmerexplor -p path/to/*.fastq.gz
-```
- 
-`-c` for multithreading, `-k` to keep counts (input must be fastq):
-
-``` 
-kmerexplor -p -c 16 -k path/to/*.fastq.gz
+kmerexplor-results
+├── countTags			# with '--keep' option
+├── kmerTool.html
+├── lib
+│   ├── echarts-en.min.js
+│   ├── scripts.js
+│   └── styles.css
+└── table.tsv
 ```
 
-You can skip the count step thanks to countTags output (see `-k` option):
-
-```
-kmerexplor -p path/to/countTags/files/*.tsv
-```
-
-`-o` to choose a directory output, `--title` to show title in results:
-
-```
-kmerexplor -p -o output_dir --title 'Title in html page dir/*.fastq.gz'
-```
-
-Advanced: use your own tag file and associated config.yaml file:
-
-```
-kmerexplor -p -tags my_tags.tsv --config my_config.yaml dir/*.fast.gz
-```
 
 ## Usage
 
@@ -139,13 +129,14 @@ optional arguments:
   --scale scale         Scale factor, to avoid too small values of counts.
                         (default: 1)
   --config config.yaml  Configuration yaml file of each category (default:
-                        "lib/config.yaml")
+                        built-in "config.yaml")
   --title TITLE         Title to be displayed in the html page
   -y, --yes, --assume-yes
                         Assume yes to all prompt answers
   -c cores, --cores cores
-                        Number of CPUs cores (default: 1). Valid especially
-                        when starting from fastq file.
+                        Specifies the number of files which can be processed
+                        simultaneously by countTags. (default: 1). Valid when
+                        inputs are fastq file.
   -v, --version         show program's version number and exit
 
  ```
@@ -158,18 +149,18 @@ By default, `KmerExploR` deletes intermediate files, particularly countTags outp
 
 countTags outputs are located in a directory named `countTags`, located in `kmerexplor-results` by default or specified by `-o` option.
 
-Then when you run KmerExploR with this directory as argument (`kmerexplor-results/countTags/*.tsv` by default), `countTags` step is bypassed, saving a lot of time.
+If you want to run again KmerExploR with the same input dataset, you can directly use  this directory (`kmerexplor-results/countTags/*.tsv`). CountTags step will be bypassed which is saving a lot of time.
 
 ### --tags tags_file
 
-KmerExploR uses an internal default tag file. You can specify another tags file with `--tags` option with as alternate tags file (compressed or not).
+KmerExploR uses an internal default tag file. You can specify another tags file using `--tags` option with an alternate tags file (compressed or not).
 
 #### Tags file format
 
 Tags file format is tabuled in 2 columns.
 
-- column 1 : kmer
-- column 2 : description, dashes "-" are important, because they define a structure. 
+- column 1 : kmer sequence
+- column 2 : description with dashes "-" are separator, The dashes are very important to define the structure.
 
 Example : 
 
@@ -187,30 +178,30 @@ __Warning__ : `config.yaml` file must refer to the same categories than tags fil
 
 ### --config config.yaml
 
-Associated to the tags file, KmerExploR include a configuration file. It is used to reference kmers by categories (ex: Orientation, Mycoplasma) and display some parameters for graphs. It is strongly linked to the tags file. 
-When you set your own tag file, probably you will must specify you own config file.
+Associated to the tags file, KmerExploR includes a configuration file. It is used to reference kmers by categories (ex: Orientation, Mycoplasma) and display some parameters for graphs. It is strongly linked to the tags file. 
+When you set your own tag file, you also have to specify you own matching config file.
  
- Example for a categorie : 
+ Example for one categorie : 
  
 
 ```
 Basic_features:   # Meta category, show in left sidenav (underscores are replaced by blank)
   Histone:        # Must match with first item (characters before first dash) of the second column
                   # in the tabuled tags file. Also, they will be used for Javascript function names.
-                  # They must be uniq, and contain uniquely letters, digits and underscores
+                  # They must be unique, and contain uniquely letters, digits and underscores
     sidenav : Poly A / Ribo D
                   # Show in the left sidebar
     title: Poly A and Ribo depletion by Histone detection
                   # Title of the graph, in the main page.
     threshold: 350
-                  # nothing if threshold is not needed.
+                  # Leave blank if threshold is not needed.
                   # More than one threshold possible by adding multiple values separated by coma (ex: 350,450).
     chart_type: bar
-                  # Only bar at this time.
+                  # Only bar is admitted at this time.
     chart_theme: light
                   # light, dark, or nothing
     desc:         # More details on the graph, located under it
-      - Short description of Poly A and Ribodepletionq
+      - Short description of Poly A and Ribodepletion (show as title)
       - A paragraph of explanations.
       - Another paragraph.
 ```
@@ -218,6 +209,40 @@ Basic_features:   # Meta category, show in left sidenav (underscores are replace
 Using an alternative tag file, you probably have to redefine the `config.yaml` file, `--config` option specifies the location of an alternative yaml configuration file.
 
 
-__Nota:__ if you add `as_percent:` to a category, results will be in percentage (take a look at `Read biases` results).
+__Nota:__ if you add `as_percent:` to a category (empty or not), results will be in percentage (take a look at `Read biases` results).
 
+
+
+## Examples:
+
+Mandatory: `-p` for paired-end or `-s` for single:
+
+```
+kmerexplor -p path/to/*.fastq.gz
+```
+ 
+`-c` for multithreading, `-k` to keep counts (input must be fastq):
+
+``` 
+kmerexplor -p -c 16 -k path/to/*.fastq.gz
+```
+
+You can skip the counting step thanks to countTags output (see `-k` option):
+
+```
+kmerexplor -p path/to/countTags/files/*.tsv
+```
+
+`-o` to choose your directory output (directory will be created),  
+`--title` to show title in results:
+
+```
+kmerexplor -p -o output_dir --title 'Title in html page dir/*.fastq.gz'
+```
+
+Advanced: using your own tag file and associated config.yaml file:
+
+```
+kmerexplor -p -tags my_tags.tsv --config my_config.yaml dir/*.fast.gz
+```
 

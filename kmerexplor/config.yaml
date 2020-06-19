@@ -95,7 +95,8 @@ Contamination:
   Specie:
     sidenav: Species
     title: Ensembl species
-    threshold: 0.1
+    as_percent: True
+    threshold:
     chart_type: bar
     chart_theme: light
     desc:

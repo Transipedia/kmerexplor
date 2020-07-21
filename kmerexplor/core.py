@@ -26,20 +26,17 @@ import argparse
 import multiprocessing
 # from functools import partial       # to send multiple arguments with pool.starmap
 import tempfile
-import shutil
 import gzip
 import glob
 import subprocess
 
+from common import *
 import checkFile as cf
 import samples
 from counts import Counts
 from mk_results import TSV, HTML
 import info
-
-
-APPPATH = os.path.dirname(os.path.realpath(__file__))
-DEFAULT_TAGSFILE = 'indexes/Human_tags.tsv.gz'
+from opt_actions import DumpAction, ShowTagsAction
 
 
 def main():
@@ -125,7 +122,7 @@ def usage():
     """
     Help function with argument parser.
     """
-    
+
     ### Text at the end (command examples)
     epilog  = "Examples:\n"
     epilog += "\n # Mandatory: -p for paired-end or -s for single:\n"
@@ -138,98 +135,103 @@ def usage():
     epilog += "\n # --title to show title in results:\n"
     epilog += " %(prog)s -p -o output_dir --title 'Title in html page dir/*.fastq.gz'\n"
     epilog += "\n # Advanced: use your own tag file and config.yaml file:\n"
-    epilog += " %(prog)s -p -tags my_tags.tsv --config my_config.yaml dir/*.fast.gz\n"
+    epilog += " %(prog)s -p --tags my_tags.tsv --config my_config.yaml dir/*.fast.gz\n"
     ### Argparse
     parser = argparse.ArgumentParser(epilog=epilog,
         formatter_class=argparse.RawDescriptionHelpFormatter,
         # formatter_class=argparse.RawTextHelpFormatter,
     )
-    method = parser.add_mutually_exclusive_group(required=True)
+    method = parser.add_mutually_exclusive_group(required=True) # method = paired or single
+    special_group = parser.add_argument_group(title='Extra features')
     parser.add_argument('files',
                         help='fastq or fastq.gz or tsv countTag files',
                         nargs='+',
                         default=sys.stdin,
                         metavar=('files'),
-                       )
+    )
     parser.add_argument('-d', '--debug',
                         action='store_true',
                         help='debug',
-                       )
+    )
     parser.add_argument('-t', '--tags',
                         help='tag file.',
-                       )
+    )
+    ### Hidden at this time
+    parser.add_argument('-S', '--specie',
+                        help=argparse.SUPPRESS,
+                        default='human',
+                        choices=[s for s in SPECIES],
+    )
     method.add_argument('-s', '--single',
                         action='store_true',
                         help='when samples are single.',
-                       )
+    )
     method.add_argument('-p', '--paired',
                         action='store_true',
                         help='when samples are paired.',
-                       )
+    )
     parser.add_argument('-o', '--output',
                         default='./{}-results'.format(info.APPNAME.lower()),
                         help='output directory (default: "./{}-results").'.format(info.APPNAME.lower()),
                         metavar='output_dir',
-                       )
+    )
     parser.add_argument('-k', '--keep-counts',
                         action='store_true',
                         help='keep countTags outputs.',
-                       )
+    )
     parser.add_argument('--tmp-dir',
                         default='/tmp',
-                        help='Temporary files directory.',
+                        help='temporary files directory.',
                         metavar='tmp_dir',
-                       )
+    )
+    ### Deprecated since countTags has the billiard option
     parser.add_argument('--scale',
                         default=1,
                         type=int,
-                        help='Scale factor, to avoid too small values of counts. (default: 1).',
+                        help='scale factor, to avoid too small values of counts. (default: 1).',
                         metavar=('scale'),
-                        )
+    )
     parser.add_argument('--config',
                         default='config.yaml',
-                        help='Configuration yaml file of each category (default: built-in "config.yaml").',
+                        help='alternate config yaml file of each category (default: built-in "config.yaml").',
                         metavar='config.yaml',
-                       )
+    )
+    special_group.add_argument('--dump-config',
+                        action=DumpAction,
+                        arg='file',
+                        nargs='?',
+                        metavar='config.yaml',
+                        help='dump builtin config file as specified name to current directory and exit (default name: config.yaml).',
+    )
+    special_group.add_argument('--show-tags',
+                        action=ShowTagsAction,
+                        help='print builtin categories and predictors and exit.',
+                        nargs=0,
+    )
     parser.add_argument('--title',
                         default='',
                         help='Title to be displayed in the html page.',
-                       )
+    )
     parser.add_argument('-y', '--yes', '--assume-yes',
                         action='store_true',
-                        help='Assume yes to all prompt answers.',
-                       )
+                        help='assume yes to all prompt answers.',
+    )
     parser.add_argument('-c', '--cores',
                         default=1,
                         type=int,
-                        help='Specifies the number of files which can be processed simultaneously by countTags. (default: 1). Valid when inputs are fastq file.',
+                        help='specifies the number of files which can be processed simultaneously' +
+                        ' by countTags. (default: 1). Valid when inputs are fastq file.',
                         metavar=('cores'),
-                       )
+    )
     parser.add_argument('-v', '--version',
                         action='version',
                         version='%(prog)s version: {}.'.format(info.VERSION)
-                       )
+    )
     ### Go to "usage()" without arguments or stdin
     if len(sys.argv) == 1 and sys.stdin.isatty():
         parser.print_help()
         sys.exit()
     return parser.parse_args()
-
-
-def get_tags_file(args):
-    """ Function doc """
-    ### Find tags file
-    ## --tags used to specify tags file
-    if args.tags:
-        tags_file = args.tags
-    ## default tags file (TAGSFILE)
-    else:
-        tags_file = os.path.join(APPPATH, DEFAULT_TAGSFILE)
-    ### Is tag file here ?
-    if not os.path.isfile(tags_file):
-        print("\n FileError: tags file '{}' not Found.\n".format(args.tags))
-        sys.exit(ending(args))
-    return tags_file
 
 
 def is_valid(file, args):
@@ -283,16 +285,6 @@ def show_res(args, tags, tsvfile, htmlfile, files_type):
     except:
         pass
 
-
-def ending(args, files_type=None):
-    """ Function doc """
-    ### In debug mode, do not remove temporary files.
-    if args.debug:
-        print("\n In debug mode, you should remove manually {} temp directory".format(args.tmp_dir))
-    else:
-        shutil.rmtree(args.tmp_dir)
-    ### With EOF, the program ending succesfully.
-    if  args.debug: print("EOF")
 
 
 if __name__ == "__main__":

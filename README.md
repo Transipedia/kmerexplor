@@ -3,8 +3,8 @@
 
 - [Description](#description)
 - [Installation](#installation)
-	+ [Option 1: install with pip](#Option_1_install_KmerExploR_with_pip)
-	+ [Option 2: install with git](#Option_2_install_KmerExploR_with_git_by_cloning_repository)
+	+ [Option 1: install with pip](#option_1_install_kmerexplor_with_pip)
+	+ [Option 2: install with git](#Option_2_install_kmerexplor_with_git_by_cloning_repository)
 - [Input](#input)
 - [Output](#output)
 - [Examples](#examples)
@@ -46,7 +46,7 @@ We recommand tu use ``pip` as it install everything you need automatically.
 # as user
 python3 -m pip install --user kmerexplor
 
-# as root or in virtualenv
+# in virtualenv or as root
 python3 -m pip install kmerexplor
 ```
 **Nota**: using pip as user without virtual environment, make sure your PATH variable include `~/.local/bin`.
@@ -70,7 +70,7 @@ sudo ln -s $PWD/kmerexplor/kmerexplor/core.py /usr/local/bin/kmerexplor
 
 - fastq or outputs from countTags (gzipped or not). 
 
-For paired samples, fastq names must be in illumina format (`_R1_001` and `_R2_001`), or they must end by `_1.fastq[.gz]` and `2.fastq[.gz]`. `countTags` files must end by `tsv[.gz]`. `countTags` files can be aggregate in a multiculumn single file.
+For paired samples, fastq names must be in illumina format (`_R1_001` and `_R2_001`), or they must end by `_1.fastq[.gz]` and `2.fastq[.gz]`. `countTags` files must end by `tsv[.gz]`. `countTags` files can be aggregated in a single multi-culumn file.
 
 **optional:**
 
@@ -138,6 +138,11 @@ optional arguments:
                         simultaneously by countTags. (default: 1). Valid when
                         inputs are fastq file.
   -v, --version         show program's version number and exit
+  
+Extra features:
+  --dump-config [config.yaml]
+                        dump builtin config file as specified name to current directory and exit (default name: config.yaml).
+  --show-tags           print builtin categories and predictors and exit.
 
  ```
  

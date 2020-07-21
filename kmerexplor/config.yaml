@@ -1,4 +1,4 @@
-
+### config.yaml: parameters to display results in HTML page.
 Basic_features:   # Meta category, show in left sidenav (underscores are replaced by blank)
   Histones:       # Must match with first item (characters before first dash) of the second column
                   # in the tabuled index file. Also, they will be used for Javascript function names.
@@ -115,13 +115,4 @@ Miscellaneous:
       - Description of Chimera
       - A paragraph of explanations.
       - Another paragraph
-  #~ MSCLinc:
-    #~ sidenav: MSClinc
-    #~ title: MSClinc
-    #~ threshold: 120
-    #~ chart_type: bar
-    #~ chart_theme: light
-    #~ desc:
-      #~ - Description of MSCLinc
-      #~ - A paragraph of explanations.
-      #~ - Another paragraph
+

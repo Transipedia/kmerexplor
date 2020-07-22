@@ -378,7 +378,7 @@ class HTML:
         chartjs += "        xAxis: {type: 'category'},\n"
         chartjs += "        yAxis: {max: category.yAxis_max},\n"
         chartjs += "        series: series,\n"
-        chartjs += "    }\n"
+        chartjs += "    };\n"
         chartjs += "    myChart.setOption(option);\n\n"
         chartjs += "    // Add Description;\n"
         chartjs += "    description(category);\n"

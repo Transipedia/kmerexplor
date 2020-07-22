@@ -62,9 +62,9 @@ class ShowTagsAction(argparse.Action):
                     except IndexError:
                         sys.exit(f"OptionError: argument {arg} expected one argument")
         tags_file = get_tags_file(Args)
-        
+
         categories = {}
-        ### open tag file 
+        ### open tag file
         if os.path.splitext(tags_file)[1] == '.gz':
             fh = gzip.open(tags_file, 'rt')
         else:
@@ -79,12 +79,12 @@ class ShowTagsAction(argparse.Action):
                 categories[category] = {predictor}
             else:
                 categories[category].add(predictor)
-        
-        ### Display categories and prdedictors
+
+        ### Display categories and predictors
         for categ,predictors in categories.items():
             print(categ)
             for predictor in predictors:
                 print(f"  {predictor}")
-        
+
         ### exit !!!
         sys.exit()

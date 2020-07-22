@@ -8,7 +8,7 @@ import shutil
 APPPATH = os.path.dirname(os.path.realpath(__file__))
 SPECIES = {
     'human': os.path.join(APPPATH, 'indexes', 'Human_tags.tsv.gz'),
-    'mouse': os.path.join(APPPATH, 'indexes', 'Mouse_tags.tsv.gz'),
+    #'mouse': os.path.join(APPPATH, 'indexes', 'Mouse_tags.tsv.gz'),
 }
 
 

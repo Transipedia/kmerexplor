@@ -8,7 +8,6 @@ Basic_features:   # Meta category, show in left sidenav (underscores are replace
     title: Poly A and Ribo depletion by Histone detection
                   # Title of the graph
     threshold: 350
-                  # BE CAREFULL : 0.005 is the minimum value (echartjs bug ?).
                   # 2 values separated by commas are admitted (e.g. threshold: 120, -120).
     chart_type: bar
                   # Only bar is admitted at this time.
@@ -103,16 +102,3 @@ Contamination:
       - Description of Ensembl species
       - A paragraph of explanations.
       - Another paragraph
-
-Miscellaneous:
-  Chimera:
-    sidenav: Chimera
-    title: Chimera
-    threshold:
-    chart_type: bar
-    chart_theme: light
-    desc:
-      - Description of Chimera
-      - A paragraph of explanations.
-      - Another paragraph
-

@@ -108,40 +108,46 @@ Without options or with `--help`, `KmerExploR` returns Help
 
  
  ```
-usage: kmerexplor [-h] [-d] [-t TAGS] (-s | -p) [-o output_dir] [-k]
-                [--tmp-dir tmp_dir] [--scale scale] [--config config.yaml]
-                [--title TITLE] [-y] [-c cores] [-v]
-                files [files ...]
+usage: kmerexplor-dev [-h] (-s | -p) [-k] [-d] [-o <output_dir>]
+                      [--tmp-dir <tmp_dir>] [--config config.yaml]
+                      [-t <tag_file>] [-a <tag_file>]
+                      [--dump-config [config.yaml]] [--show-tags]
+                      [--title TITLE] [-y] [-c <cores>] [-v]
+                      <file1> ... [<file1> ... ...]
 
 positional arguments:
-  files                 fastq or fastq.gz or tsv countTag files
+  <file1> ...           fastq or fastq.gz or tsv countTag files.
 
 optional arguments:
   -h, --help            show this help message and exit
+  -s, --single          when samples are single.
+  -p, --paired          when samples are paired.
+  -k, --keep-counts     keep countTags outputs.
   -d, --debug           debug
-  -t TAGS, --tags TAGS  tag file
-  -s, --single          when samples are single
-  -p, --paired          when samples are paired
-  -o output_dir, --output output_dir
-                        output directory (default: "./KmerExploR-results")
-  -k, --keep-counts     keep countTags outputs
-  --tmp-dir tmp_dir     Temporary files directory
-  --scale scale         Scale factor, to avoid too small values of counts.
-                        (default: 1)
-  --config config.yaml  Configuration yaml file of each category (default:
-                        built-in "config.yaml")
-  --title TITLE         Title to be displayed in the html page
+  -o <output_dir>, --output <output_dir>
+                        output directory (default: "./kmerexplor-results").
+  --tmp-dir <tmp_dir>   temporary files directory.
+  --title TITLE         Title to be displayed in the html page.
   -y, --yes, --assume-yes
-                        Assume yes to all prompt answers
-  -c cores, --cores cores
-                        Specifies the number of files which can be processed
+                        assume yes to all prompt answers.
+  -c <cores>, --cores <cores>
+                        specifies the number of files which can be processed
                         simultaneously by countTags. (default: 1). Valid when
                         inputs are fastq file.
   -v, --version         show program's version number and exit
-  
+
+Advenced features:
+  --config config.yaml  alternate config yaml file of each category (default:
+                        built-in "config.yaml").
+  -t <tag_file>, --tags <tag_file>
+                        Alternate tag file.
+  -a <tag_file>, --add-tags <tag_file>
+                        Additional tag file.
+
 Extra features:
   --dump-config [config.yaml]
-                        dump builtin config file as specified name to current directory and exit (default name: config.yaml).
+                        dump builtin config file as specified name to current
+                        directory and exit (default name: config.yaml).
   --show-tags           print builtin categories and predictors and exit.
 
  ```

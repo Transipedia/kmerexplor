@@ -24,16 +24,16 @@ def get_tags_file(args):
     ### Is tag file here ?
     if not os.path.isfile(tags_file):
         print("\n FileError: tags file '{}' not Found.\n".format(tags_file))
-        sys.exit(ending(args))
+        sys.exit(exit_gracefully(args))
     return tags_file
 
 
-def ending(args, files_type=None):
+def exit_gracefully(args, files_type=None):
     """ Function doc """
     ### In debug mode, do not remove temporary files.
     if args.debug:
         print("\n In debug mode, you should remove manually {} temp directory".format(args.tmp_dir))
     elif args.tmp_dir:
             shutil.rmtree(args.tmp_dir)
-    ### With EOF, the program ending succesfully.
+    ### With EOF, the program exit succesfully.
     if  args.debug: print("EOF")

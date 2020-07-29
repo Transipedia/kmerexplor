@@ -39,14 +39,12 @@ import info
 from opt_actions import DumpAction, ShowTagsAction
 
 
-def main():
+def main(args):
     """ Function doc """
-    ### 1. Manage command line arguments
-    args = usage()
     nprocs, files = args.cores, args.files
     if args.debug: print("Arguments:", args)
     ### create directory for temporay files
-    args.tmp_dir = tempfile.mkdtemp(prefix=info.APPNAME + "-", dir=args.tmp_dir)
+    args.tmp_dir = tempfile.mkdtemp(prefix=info.APPNAME.lower() + "-", dir=args.tmp_dir)
 
     ### 2. get kmers size
     kmer_size = get_kmers_size(args)
@@ -67,7 +65,7 @@ def main():
         ### If a file(s) is not valid, exit with error message.
         if files_in_error:
             print(*files_in_error, sep='\n')
-            sys.exit(ending(args))
+            sys.exit(exit_gracefully(args))
         ### If a mix of valid file type are found, exit
         if len(valid_types) != 1:
             print("Multiples valid type found ({}).".format(*valid_types))
@@ -78,9 +76,12 @@ def main():
         sample_list = set_sample_list(files, args, files_type)
         if not sample_list:
             print("\n Error: no samples {} found\n".format('single' if args.single else 'paired'))
-            sys.exit(ending(args, files_type))
+            sys.exit(exit_gracefully(args, files_type))
 
-    ### 5. If input files are fastq, run countTags (Multiprocessed)
+    ### 5. Handle tags
+    tags_file = get_tags_file(args)
+
+    ### 6. If input files are fastq, run countTags (Multiprocessed)
     if files_type == 'fastq':
         ### create directory for temporary files and countTags output
         if args.keep_counts:
@@ -88,10 +89,8 @@ def main():
             args.counts_dir = os.path.join(args.output, 'countTags')
             os.makedirs(args.counts_dir, exist_ok=True)
         else:
-            ## Else counts will be removed at the ending() function
+            ## Else counts will be removed at the exit_gracefully() function
             args.counts_dir = args.tmp_dir
-        ### Find tags file
-        tags_file = get_tags_file(args)
         ### Compute countTags with multi processing (use --core to specify cores counts)
         sys.stderr.write("\n ✨✨ Starting countTags, please wait.\n\n")
         with multiprocessing.Pool(processes=nprocs) as pool:
@@ -101,21 +100,21 @@ def main():
     else:
         samples_path = args.files
 
-    ### 6. merge countTags tables
+    ### 7. merge countTags tables
     sys.stderr.write("\n ✨✨ Starting merge of counts.\n")
     samples_path.sort()
     counts = Counts(samples_path, args)
 
-    ### 7. Build results as html pages and tsv table
+    ### 8. Build results as html pages and tsv table
     sys.stderr.write("\n ✨✨ Build output html page.\n")
     table = TSV(counts, args)             # create TSV file
     charts = HTML(counts, args, info)      # create résults in html format
 
-    ### 8. show results
+    ### 9. show results
     show_res(args,counts, table.tsvfile, charts.htmlfile, files_type)
 
-    ### 9. ending program
-    ending(args, files_type)
+    ### 10. exit gracefully program
+    exit_gracefully(args, files_type)
 
 
 def usage():
@@ -142,25 +141,13 @@ def usage():
         # formatter_class=argparse.RawTextHelpFormatter,
     )
     method = parser.add_mutually_exclusive_group(required=True) # method = paired or single
+    advanced_group = parser.add_argument_group(title='Advenced features')
     special_group = parser.add_argument_group(title='Extra features')
     parser.add_argument('files',
-                        help='fastq or fastq.gz or tsv countTag files',
+                        help='fastq or fastq.gz or tsv countTag files.',
                         nargs='+',
                         default=sys.stdin,
-                        metavar=('files'),
-    )
-    parser.add_argument('-d', '--debug',
-                        action='store_true',
-                        help='debug',
-    )
-    parser.add_argument('-t', '--tags',
-                        help='tag file.',
-    )
-    ### Hidden at this time
-    parser.add_argument('-S', '--specie',
-                        help=argparse.SUPPRESS,
-                        default='human',
-                        choices=[s for s in SPECIES],
+                        metavar=('<file1> ...'),
     )
     method.add_argument('-s', '--single',
                         action='store_true',
@@ -170,31 +157,50 @@ def usage():
                         action='store_true',
                         help='when samples are paired.',
     )
-    parser.add_argument('-o', '--output',
-                        default='./{}-results'.format(info.APPNAME.lower()),
-                        help='output directory (default: "./{}-results").'.format(info.APPNAME.lower()),
-                        metavar='output_dir',
-    )
     parser.add_argument('-k', '--keep-counts',
                         action='store_true',
                         help='keep countTags outputs.',
     )
+    parser.add_argument('-d', '--debug',
+                        action='store_true',
+                        help='debug',
+    )
+    ### Hidden at this time
+    parser.add_argument('-S', '--specie',
+                        help=argparse.SUPPRESS,
+                        default='human',
+                        choices=[s for s in SPECIES],
+    )
+    parser.add_argument('-o', '--output',
+                        default='./{}-results'.format(info.APPNAME.lower()),
+                        help='output directory (default: "./{}-results").'.format(info.APPNAME.lower()),
+                        metavar='<output_dir>',
+    )
     parser.add_argument('--tmp-dir',
                         default='/tmp',
                         help='temporary files directory.',
-                        metavar='tmp_dir',
+                        metavar='<tmp_dir>',
     )
     ### Deprecated since countTags has the billiard option
     parser.add_argument('--scale',
                         default=1,
                         type=int,
-                        help='scale factor, to avoid too small values of counts. (default: 1).',
+                        help=argparse.SUPPRESS,
+                        # help='scale factor, to avoid too small values of counts. (default: 1).',
                         metavar=('scale'),
     )
-    parser.add_argument('--config',
+    advanced_group.add_argument('--config',
                         default='config.yaml',
                         help='alternate config yaml file of each category (default: built-in "config.yaml").',
                         metavar='config.yaml',
+    )
+    advanced_group.add_argument('-t', '--tags',
+                        help='Alternate tag file.',
+                        metavar='<tag_file>',
+    )
+    advanced_group.add_argument('-a', '--add-tags',
+                        help='Additional tag file.',
+                        metavar='<tag_file>',
     )
     special_group.add_argument('--dump-config',
                         action=DumpAction,
@@ -221,11 +227,11 @@ def usage():
                         type=int,
                         help='specifies the number of files which can be processed simultaneously' +
                         ' by countTags. (default: 1). Valid when inputs are fastq file.',
-                        metavar=('cores'),
+                        metavar=('<cores>'),
     )
     parser.add_argument('-v', '--version',
                         action='version',
-                        version='%(prog)s version: {}.'.format(info.VERSION)
+                        version='%(prog)s version: {}'.format(info.VERSION)
     )
     ### Go to "usage()" without arguments or stdin
     if len(sys.argv) == 1 and sys.stdin.isatty():
@@ -269,7 +275,7 @@ def do_countTags(sample, tags_file, kmer_size, args):
                     -i {2} {3} > {5}/{4}.tsv'.format(APPPATH, kmer_size, tags_file, sample[0],
                                                     ''.join(sample[1:]), args.counts_dir)
     if args.debug: print("{}: Start countTag processing.\n{}".format(sample[1], countTag_cmd))
-    os.system(countTag_cmd)
+    os.popen(countTag_cmd).read()
     print("  {}: countTag processed.".format(''.join(sample[1:])))
 
 
@@ -288,4 +294,11 @@ def show_res(args, tags, tsvfile, htmlfile, files_type):
 
 
 if __name__ == "__main__":
-    main()
+    ### 1. Manage command line arguments
+    args = usage()
+    ### If "ctrl C" is set, quit after executing exit_gracefully function
+    try:
+        main(args)
+    except KeyboardInterrupt:
+        print(f"Process nterrupt by user")
+        exit_gracefully(args)

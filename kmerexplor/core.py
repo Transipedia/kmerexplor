@@ -39,7 +39,19 @@ import info
 from opt_actions import DumpAction, ShowTagsAction
 
 
-def main(args):
+def main():
+    """ Handle keyboard interrupt commands and launch program """
+    ### 1. Manage command line arguments
+    args = usage()
+    ### If "ctrl C" is set, quit after executing exit_gracefully function
+    try:
+        run(args)
+    except KeyboardInterrupt:
+        print(f"Process interrupted by user")
+        exit_gracefully(args)
+
+
+def run(args):
     """ Function doc """
     nprocs, files = args.cores, args.files
     if args.debug: print("Arguments:", args)
@@ -294,11 +306,4 @@ def show_res(args, tags, tsvfile, htmlfile, files_type):
 
 
 if __name__ == "__main__":
-    ### 1. Manage command line arguments
-    args = usage()
-    ### If "ctrl C" is set, quit after executing exit_gracefully function
-    try:
-        main(args)
-    except KeyboardInterrupt:
-        print(f"Process nterrupt by user")
-        exit_gracefully(args)
+    main()

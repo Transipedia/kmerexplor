@@ -144,7 +144,7 @@ def usage():
     epilog += " %(prog)s -p path/to/countTags/files/*.tsv\n"
     epilog += "\n # -o to choose your directory output (directory will be created),"
     epilog += "\n # --title to show title in results:\n"
-    epilog += " %(prog)s -p -o output_dir --title 'Title in html page dir/*.fastq.gz'\n"
+    epilog += " %(prog)s -p -o output_dir --title 'Title displayed on the html page' dir/*.fastq.gz'\n"
     epilog += "\n # Advanced: use your own tag file and config.yaml file:\n"
     epilog += " %(prog)s -p --tags my_tags.tsv --config my_config.yaml dir/*.fast.gz\n"
     ### Argparse
@@ -177,7 +177,7 @@ def usage():
                         action='store_true',
                         help='debug',
     )
-    ### Hidden at this time
+    ### Depreciated : hidden for the moment
     parser.add_argument('-S', '--specie',
                         help=argparse.SUPPRESS,
                         default='human',

@@ -123,7 +123,7 @@ class HTML:
         index_html += '  </div>\n'
         index_html += '  <div id=content>\n'
         index_html += '    <div id=home_content></div>\n'
-        index_html += '    <div id=chart_content style="height:600px;"></div>\n'
+        index_html += '    <div id=chart_content></div>\n'
         index_html += '    <div id=desc_content></div>\n'
         index_html += '  </div>\n'
         index_html += '</div>\n\n'
@@ -144,7 +144,7 @@ class HTML:
         styles_css += '#main {margin-left: 250px;transition: margin-left .5s;}'
         styles_css += '#header {background: #333333;color: #f1f1f1;padding: 4px 8px;}'
         styles_css += '#header h1 {display: inline;margin-left : 8%;}'
-        styles_css += '#content {padding: 16px;}'
+        styles_css += '#content {padding: 16px;line-height: 1.5;}'
         styles_css += '.sidenav {height: 100%;position: fixed;z-index: 1;top: 0;left: 0;background-color: #333333;overflow-x: hidden;transition: 0.5s}'
         styles_css += '#Sidenav h1 {color: #f1f1f1;padding: 8px 10px;}'
         styles_css += '#sidenav_items {padding-top: 30px;}'
@@ -152,6 +152,7 @@ class HTML:
         styles_css += '#sidenav_items a:hover {color: #f1f1f1;}'
         styles_css += '.meta-category {font-size: 1.2em; padding: 5px 10px; color: #878787;}'
         styles_css += 'summary {cursor: pointer;}'
+        styles_css += 'hr {margin: 25px 0;}'
         with open(os.path.join(self.tree_dir, 'styles.css'), 'w') as file:
             file.write(styles_css)
 
@@ -333,6 +334,9 @@ class HTML:
         chartjs += "    // clear home content\n"
         chartjs += "    home_html = document.getElementById('home_content');\n"
         chartjs += "    home_html.innerHTML = '';\n"
+        chartjs += "    // weight of chart content\n"
+        chartjs += "    chart_html = document.getElementById('chart_content');\n"
+        chartjs += "    chart_html.style.height = '600px';\n"
         chartjs += "    // set series (same object * categories count)\n"
         chartjs += "    series = set_series(category);\n"
         chartjs += "    // dataset = samples + dataset\n"
@@ -416,6 +420,35 @@ class HTML:
         """
         Build code to add home page
         """
+        # information of analysis (samples, version, etc.)
+        msg_info = []
+        msg_info.append("<details><p><summary>{} samples analysed</summary></p>".format(len(self.counts.samples)))
+        msg_info.append("<p>{}</p></details>".format(" - ".join(self.counts.samples)))
+        msg_info.append("<p>Mode: {}</p>".format(self.counts.mode))
+        msg_info.append("<p>{} version: {}</p>".format(self.info.APPNAME, self.info.VERSION))
+        if args.scale != 1:
+            msg_info.append("<p>Scale: x{}</p>".format(args.scale))
+        # General description of kmerexplor
+        msg_desc = (
+            "<p><strong>KmerExploR</strong> visualization of your RNA-seq basic features is separated into several sections/subsections:</p>",
+            "<p><strong>Basic Features</strong></p>",
+            "<ul>",
+            "    <li>Poly A / Ribo D: are my RNA-seq data based on poly-A selection protocol or ribo-depletion ?</li>",
+            "    <li>Orientation: are my RNA-seq libraries stranded or not ?</li>",
+            "    <li>Y chromosome: what is/are the gender(s) corresponding to my samples ?</li>",
+            "    <li>Read position biases: is there a read coverage bias from 5' to 3' ends ?</li>",
+            "</ul>",
+            "<p><strong>Contamination</strong></p>",
+            "<ul>",
+            "    <li>HeLa: are my RNA-seq data contaminated by HeLa (presence of HeLa-derived human papillomavirus 18) ?</li>",
+            "    <li>Mycoplasma: are my RNA-seq data contaminated by mycoplasmas ? </li>",
+            "    <li>Virus: are my RNA-seq data contaminated by viruses such as hepatitis B virus ?</li>",
+            "    <li>Species: what is/are the species present into my samples ?</li>",
+            "</ul>",
+            "<p>For each subsection, a graph shows the quantification of predictor genes (Y axis, mean k-mer counts normalized per billion of k-mers in the sample) in each RNA-seq sample of your dataset (X axis). More details on the predictor genes and their selection to answer a specific biological question are described into the corresponding subsections.</p>",
+            "<em>Citation: ref paper Kmerator Suite (?)<em>",
+        )
+        # build Javascript code to home page
         homejs = "\n// Home page\n"
         homejs += "function home() {\n"
         homejs += "    // clear home content\n"
@@ -424,18 +457,17 @@ class HTML:
         homejs += "    // clear charts\n"
         homejs += "    chart_html = document.getElementById('chart_content');\n"
         homejs += "    chart_html.innerHTML = '';\n"
+        homejs += "    chart_html.style.height = 0;\n"
         homejs += "    // clear chart description\n"
         homejs += "    desc_html = document.getElementById('desc_content');\n"
         homejs += "    desc_html.innerHTML = '';\n"
         homejs += "    // content of Home page\n"
-        homejs += "    home_html.innerHTML += '<details><p><summary>{} samples analysed</summary></p>".format(len(self.counts.samples))
-        homejs += "<p>{}</p></details>'\n".format(" - ".join(self.counts.samples))
-        homejs += "    home_html.innerHTML += '<p>Mode: {}</p>'\n".format(self.counts.mode)
-        homejs += "    home_html.innerHTML += '<p>{} version: {}</p>'\n".format(self.info.APPNAME, self.info.VERSION)
-        if args.scale != 1:
-            homejs += "    home_html.innerHTML += '<p>Scale: x{}</p>'\n".format(args.scale)
-        homejs += "}\n"
-
+        homejs += '    home_html.innerHTML += "' + ''.join(msg_info) + '";\n'
+        homejs += "    home_html.innerHTML += '<hr />';\n"
+        homejs += '    home_html.innerHTML += "' + ''.join(msg_desc) + '";\n'
+        homejs += "    };\n"
+        
+        
         ### write javascript code
         dest = os.path.join(self.tree_dir, self.scripts_file)
         with open(dest, 'a') as file:

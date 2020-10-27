@@ -83,16 +83,16 @@ Contamination:
       - "Viruses contamination"
       - "<strong>Predictor genes selection:</strong> viruses are a significant cause of human cancers. In a recent study, <em>Uphoff et al. (2019)</em> screened more than 300 Cancer Cell Line Encyclopedia RNA-seq and revealed 20 infected cell lines with different viruses. To rapidly explore the potential presence of viruses into RNA-seq datasets, we used the 14 viruses reference genomes described in <em>Uphoff et al.</em> Study. These viruses are listed in the legend."
       - "<strong>Specific k-mers quantification and interpretation:</strong> we used Kmerator to select, for each virus, the k-mers absent from the human reference genome and transcriptome. Next, KmerExploR uses countTags to compute k-mer occurrences number in each RNA-seq sample and calculates the mean count value for each virus (Y axis, mean k-mer counts normalized per billion of k-mers). Using this quantification, we are able to highlight potential common viruses contamination."
-  Telomeres:
-    sidenav: Telomeres
-    title: Telomeres detection
-    threshold: 10
-    chart_type: bar
-    chart_theme: light
-    desc:
-      - "Telomeres"
-      - ""
-      - ""
+  #~ Telomeres:
+    #~ sidenav: Telomeres
+    #~ title: Telomeres detection
+    #~ threshold: 10
+    #~ chart_type: bar
+    #~ chart_theme: light
+    #~ desc:
+      #~ - "Telomeres"
+      #~ - ""
+      #~ - ""
   Specie:
     sidenav: Species
     title: Ensembl species

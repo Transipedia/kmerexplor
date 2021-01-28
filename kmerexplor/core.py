@@ -153,8 +153,8 @@ def usage():
         # formatter_class=argparse.RawTextHelpFormatter,
     )
     method = parser.add_mutually_exclusive_group(required=True) # method = paired or single
-    advanced_group = parser.add_argument_group(title='Advenced features')
-    special_group = parser.add_argument_group(title='Extra features')
+    advanced_group = parser.add_argument_group(title='advanced features')
+    special_group = parser.add_argument_group(title='extra features')
     parser.add_argument('files',
                         help='fastq or fastq.gz or tsv countTag files.',
                         nargs='+',
@@ -175,7 +175,7 @@ def usage():
     )
     parser.add_argument('-d', '--debug',
                         action='store_true',
-                        help='debug',
+                        help='debug.',
     )
     ### Depreciated : hidden for the moment
     parser.add_argument('-S', '--specie',
@@ -207,11 +207,11 @@ def usage():
                         metavar='config.yaml',
     )
     advanced_group.add_argument('-t', '--tags',
-                        help='Alternate tag file.',
+                        help='alternate tag file.',
                         metavar='<tag_file>',
     )
     advanced_group.add_argument('-a', '--add-tags',
-                        help='Additional tag file.',
+                        help='additional tag file.',
                         metavar='<tag_file>',
     )
     special_group.add_argument('--dump-config',
@@ -228,7 +228,7 @@ def usage():
     )
     parser.add_argument('--title',
                         default='',
-                        help='Title to be displayed in the html page.',
+                        help='title to be displayed in the html page.',
     )
     parser.add_argument('-y', '--yes', '--assume-yes',
                         action='store_true',
@@ -237,8 +237,8 @@ def usage():
     parser.add_argument('-c', '--cores',
                         default=1,
                         type=int,
-                        help='specifies the number of files which can be processed simultaneously' +
-                        ' by countTags. (default: 1). Valid when inputs are fastq file.',
+                        help='specify the number of files which can be processed simultaneously' +
+                        ' by countTags. (default: 1). Valid when inputs are fastq files.',
                         metavar=('<cores>'),
     )
     parser.add_argument('-v', '--version',
@@ -286,9 +286,9 @@ def do_countTags(sample, tags_file, kmer_size, args):
                     --summary {5}/{4}.summary \
                     -i {2} {3} > {5}/{4}.tsv'.format(APPPATH, kmer_size, tags_file, sample[0],
                                                     ''.join(sample[1:]), args.counts_dir)
-    if args.debug: print("{}: Start countTag processing.\n{}".format(sample[1], countTag_cmd))
+    if args.debug: print("{}: Start countTags processing.\n{}".format(sample[1], countTag_cmd))
     os.popen(countTag_cmd).read()
-    print("  {}: countTag processed.".format(''.join(sample[1:])))
+    print("  {}: countTags processed.".format(''.join(sample[1:])))
 
 
 def show_res(args, tags, tsvfile, htmlfile, files_type):

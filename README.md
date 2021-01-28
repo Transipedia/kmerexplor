@@ -108,12 +108,11 @@ Without options or with `--help`, `KmerExploR` returns Help
 
  
  ```
-usage: kmerexplor-dev [-h] (-s | -p) [-k] [-d] [-o <output_dir>]
-                      [--tmp-dir <tmp_dir>] [--config config.yaml]
-                      [-t <tag_file>] [-a <tag_file>]
-                      [--dump-config [config.yaml]] [--show-tags]
-                      [--title TITLE] [-y] [-c <cores>] [-v]
-                      <file1> ... [<file1> ... ...]
+usage: kmerexplor [-h] (-s | -p) [-k] [-d] [-o <output_dir>]
+                  [--tmp-dir <tmp_dir>] [--config config.yaml] [-t <tag_file>]
+                  [-a <tag_file>] [--dump-config [config.yaml]] [--show-tags]
+                  [--title TITLE] [-y] [-c <cores>] [-v]
+                  <file1> ... [<file1> ... ...]
 
 positional arguments:
   <file1> ...           fastq or fastq.gz or tsv countTag files.
@@ -123,32 +122,33 @@ optional arguments:
   -s, --single          when samples are single.
   -p, --paired          when samples are paired.
   -k, --keep-counts     keep countTags outputs.
-  -d, --debug           debug
+  -d, --debug           debug.
   -o <output_dir>, --output <output_dir>
                         output directory (default: "./kmerexplor-results").
   --tmp-dir <tmp_dir>   temporary files directory.
-  --title TITLE         Title to be displayed in the html page.
+  --title TITLE         title to be displayed in the html page.
   -y, --yes, --assume-yes
                         assume yes to all prompt answers.
   -c <cores>, --cores <cores>
-                        specifies the number of files which can be processed
+                        specify the number of files which can be processed
                         simultaneously by countTags. (default: 1). Valid when
-                        inputs are fastq file.
+                        inputs are fastq files.
   -v, --version         show program's version number and exit
 
-Advenced features:
+advanced features:
   --config config.yaml  alternate config yaml file of each category (default:
                         built-in "config.yaml").
   -t <tag_file>, --tags <tag_file>
-                        Alternate tag file.
+                        alternate tag file.
   -a <tag_file>, --add-tags <tag_file>
-                        Additional tag file.
+                        additional tag file.
 
-Extra features:
+extra features:
   --dump-config [config.yaml]
                         dump builtin config file as specified name to current
                         directory and exit (default name: config.yaml).
   --show-tags           print builtin categories and predictors and exit.
+
 
  ```
  

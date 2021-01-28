@@ -7,7 +7,7 @@ Basic_features:   # Meta category, show in left sidenav (underscores are replace
                   # Show in the left sidebar
     title: Poly A and Ribo depletion by Histone detection
                   # Title of the graph
-    threshold: 350
+    threshold: 300
                   # 2 values separated by commas are admitted (e.g. threshold: 120, -120).
     chart_type: bar
                   # Only bar is admitted at this time.
@@ -76,7 +76,7 @@ Contamination:
   Virus_genome:
     sidenav: Virus
     title: Virus detection
-    threshold:
+    threshold: 1
     chart_type: bar
     chart_theme: light
     desc:

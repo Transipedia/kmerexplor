@@ -3,8 +3,8 @@
 
 - [Description](#description)
 - [Installation](#installation)
-	+ [Option 1: install with pip](#option_1_install_kmerexplor_with_pip)
-	+ [Option 2: install with git](#Option_2_install_kmerexplor_with_git_by_cloning_repository)
+	+ [Option 1: install with pip](#option-1-install-kmerexplor-with-pip)
+	+ [Option 2: install with git](#option-2-install-kmerexplor-with-git-by-cloning-repository)
 - [Input](#input)
 - [Output](#output)
 - [Examples](#examples)
@@ -32,6 +32,19 @@ From a bunch of fastq or countTags output files, KmerExploR provides information
 For general usage, we will use the provided set of kmers. Howerver, it is also possible to create your own kmers reference file to have specific informations on you samples such as request on a particular specie.
 
 This code is under **GPL3** licence.
+
+### Testing with dataset
+
+You can use the following dataset to test the software and to illustrate the different categories, which contains 5 paired-end human RNA-seq samples:
+
+|            |PolyA/RiboD|HeLa  | Mycoplasma | Stranded | Sex    | fastq1 | fastq2 |
+|:-----------|:---------:|:----:|:----------:|:--------:|:------:|:------:| :-----:|
+|ENCFF419GVS | PolyA     | +    |      -     |    yes   | female | [link](https://www.encodeproject.org/files/ENCFF419GVS/@@download/ENCFF419GVS.fastq.gz) | [link](https://www.encodeproject.org/files/ENCFF135CVY/@@download/ENCFF135CVY.fastq.gz) |
+|ENCFF322RPT | PolyA     | -    |      +     |    yes   | male   | [link](https://www.encodeproject.org/files/ENCFF322RPT/@@download/ENCFF322RPT.fastq.gz) | [link](https://www.encodeproject.org/files/ENCFF782AHJ/@@download/ENCFF782AHJ.fastq.gz) |
+|ENCFF001RMX | RiboD     | -    |      -     |    yes   | female | [link](https://www.encodeproject.org/files/ENCFF001RMX/@@download/ENCFF001RMX.fastq.gz) | [link](https://www.encodeproject.org/files/ENCFF001RMW/@@download/ENCFF001RMW.fastq.gz) |
+|SRR1957703  | PolyA     | -    |      -     |    yes   |   NA   | [link](https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR195/003/SRR1957703/SRR1957703_1.fastq.gz) | [link](https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR195/003/SRR1957703/SRR1957703_2.fastq.gz) |
+|SRR1957706  | PolyA     | -    |      -     |    no    |   NA   | [link](https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR195/006/SRR1957706/SRR1957706_1.fastq.gz) | [link](https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR195/006/SRR1957706/SRR1957706_2.fastq.gz) |
+
 
 
 ## Installation

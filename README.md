@@ -39,7 +39,7 @@ You can use the following dataset to test the software and to illustrate the dif
 
 |            |PolyA/RiboD|HeLa  | Mycoplasma | Stranded | Sex    | fastq1 | fastq2 |
 |:-----------|:---------:|:----:|:----------:|:--------:|:------:|:------:| :-----:|
-|ENCFF419GVS | PolyA     | +    |      -     |    yes   | female | [link](https://www.encodeproject.org/files/ENCFF419GVS/@@download/ENCFF419GVS.fastq.gz) | [link](https://www.encodeproject.org/files/ENCFF135CVY/@@download/ENCFF135CVY.fastq.gz) |
+|SRR12010285 | PolyA     | +    |      -     |    yes   | female | [link](https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR120/085/SRR12010285/SRR12010285_1.fastq.gz) | [link](https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR120/085/SRR12010285/SRR12010285_2.fastq.gz) |
 |ENCFF322RPT | PolyA     | -    |      +     |    yes   | male   | [link](https://www.encodeproject.org/files/ENCFF322RPT/@@download/ENCFF322RPT.fastq.gz) | [link](https://www.encodeproject.org/files/ENCFF782AHJ/@@download/ENCFF782AHJ.fastq.gz) |
 |ENCFF001RMX | RiboD     | -    |      -     |    yes   | female | [link](https://www.encodeproject.org/files/ENCFF001RMX/@@download/ENCFF001RMX.fastq.gz) | [link](https://www.encodeproject.org/files/ENCFF001RMW/@@download/ENCFF001RMW.fastq.gz) |
 |SRR1957703  | PolyA     | -    |      -     |    yes   |   NA   | [link](https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR195/003/SRR1957703/SRR1957703_1.fastq.gz) | [link](https://ftp.sra.ebi.ac.uk/vol1/fastq/SRR195/003/SRR1957703/SRR1957703_2.fastq.gz) |

@@ -55,8 +55,17 @@ def run(args):
     """ Function doc """
     nprocs, files = args.cores, args.files
     if args.debug: print("Arguments:", args)
-    ### create directory for temporay files
+    ### 1. Define some PATH
+    # create directory for temporay files
     args.tmp_dir = tempfile.mkdtemp(prefix=info.APPNAME.lower() + "-", dir=args.tmp_dir)
+    # define countTags PATH
+    if args.keep_counts:
+        ## If the user wants to keep the countTag counts
+        args.counts_dir = os.path.join(args.output, 'countTags')
+        os.makedirs(args.counts_dir, exist_ok=True)
+    else:
+        ## Else counts will be removed at the exit_gracefully() function
+        args.counts_dir = args.tmp_dir
 
     ### 2. get kmers size
     kmer_size = get_kmers_size(args)
@@ -95,14 +104,6 @@ def run(args):
 
     ### 6. If input files are fastq, run countTags (Multiprocessed)
     if files_type == 'fastq':
-        ### create directory for temporary files and countTags output
-        if args.keep_counts:
-            ## If the user wants to keep the countTag counts
-            args.counts_dir = os.path.join(args.output, 'countTags')
-            os.makedirs(args.counts_dir, exist_ok=True)
-        else:
-            ## Else counts will be removed at the exit_gracefully() function
-            args.counts_dir = args.tmp_dir
         ### Compute countTags with multi processing (use --core to specify cores counts)
         sys.stderr.write("\n ✨✨ Starting countTags, please wait.\n\n")
         with multiprocessing.Pool(processes=nprocs) as pool:

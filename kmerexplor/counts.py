@@ -70,11 +70,13 @@ class Counts:
         # self._check_merge()
         ### minimize counts
         self._minimize(args)
+        ### get extra info from countTags summary files
+        self.get_summary_info()
         ### some attributes to easier access
         self.samples = [sample for sample in self.tags['samples'][self.mode]]
         self.fastq = [sample for sample in self.tags['samples']['single']]
         self.types = [seq_type for seq_type in self.tags['counts']]
-        self.meta = [meta for meta in self.tags['meta']]
+        self.meta = self.tags['meta']
 
 
     def _do_merge_counts(self, args):
@@ -135,6 +137,36 @@ class Counts:
                 print(" {} found for {} ({} expected).\n".format(nrows, tags['samples']['single'][idx] , tags['meta']['nrow']))
                 sys.exit()
         return tags
+
+
+    def get_summary_info(self):
+        """ Function doc """
+        self.tags['meta']['fastq_files'] = {}
+        self.tags['meta']['total_kmers'] = 0
+        self.tags['meta']['total_reads'] = 0
+        summary_files = []
+        ### localize summary files
+        for file in self.counts_files:
+            file = file.split('.')
+            if '.'.join(file[-2:]) == 'tsv.gz':
+                summary_files.append(f"{'.'.join(file[:-2])}.summary")
+            else:
+                summary_files.append(f"{'.'.join(file[:-1])}.summary")
+        ### Add reads and kmers numbers for each sample in tags.meta
+        for file in summary_files:
+            if os.path.exists(file):
+                fastq = os.path.basename('.'.join(file.split('.')[:-1]))
+                self.tags['meta']['fastq_files'][fastq] = ['', '']
+                with open(file) as fh:
+                    for row in fh:
+                        if row.startswith('total_factors'):
+                            nkmers = row.split()[1]
+                            self.tags['meta']['fastq_files'][fastq][0] = nkmers
+                            self.tags['meta']['total_kmers'] += int(nkmers)
+                        if row.startswith('total_reads'):
+                            nreads = row.split()[1]
+                            self.tags['meta']['fastq_files'][fastq][1] = nreads
+                            self.tags['meta']['total_reads'] += int(nreads)
 
 
     def _set_counts_mean(self):

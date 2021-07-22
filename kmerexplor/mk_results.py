@@ -145,6 +145,12 @@ class HTML:
         styles_css += '#header {background: #333333;color: #f1f1f1;padding: 4px 8px;}'
         styles_css += '#header h1 {display: inline;margin-left : 8%;}'
         styles_css += '#content {padding: 16px;line-height: 1.5;}'
+        ### Table of fastq info
+        styles_css += '#fastq-info {text-align: center;border-collapse: collapse;margin-left:20px;}'
+        styles_css += '#fastq-info th {background-color:#333333;color: white;}'
+        styles_css += '#fastq-info th, #fastq-info td {border: dotted 1px gray;padding: 5px;}'
+        styles_css += '#fastq-info > tbody > tr:last-child {font-weight: bold;background-color:lightgrey;}'
+        ### Sidenav
         styles_css += '.sidenav {height: 100%;position: fixed;z-index: 1;top: 0;left: 0;background-color: #333333;overflow-x: hidden;transition: 0.5s}'
         styles_css += '#Sidenav h1 {color: #f1f1f1;padding: 8px 10px;}'
         styles_css += '#sidenav_items {padding-top: 30px;}'
@@ -428,15 +434,39 @@ class HTML:
         """
         Build code to add home page
         """
-        # information of analysis (samples, version, etc.)
+        ### information of analysis (samples, version, etc.)
         msg_info = []
-        msg_info.append("<details><p><summary>{} samples analysed</summary></p>".format(len(self.counts.samples)))
-        msg_info.append("<p>{}</p></details>".format(" - ".join(self.counts.samples)))
         msg_info.append("<p>Mode: {}</p>".format(self.counts.mode))
         msg_info.append("<p>{} version: {}</p>".format(self.info.APPNAME, self.info.VERSION))
         if args.scale != 1:
             msg_info.append("<p>Scale: x{}</p>".format(args.scale))
-        # General description of kmerexplor
+        msg_info.append("<details><p><summary>{} samples analysed</summary></p>".format(len(self.counts.samples)))
+        msg_info.append("<p>{}</p></details>".format(" - ".join(self.counts.samples)))
+        
+        ### Information on fastq files
+        msg_fastq_info = []
+        if self.counts.meta['fastq_files']:
+            msg_fastq_info.append("<details><p><summary>About fastq files</summary></p>")
+            msg_fastq_info.append("<table id='fastq-info'><tbody>")
+            msg_fastq_info.append("<tr><th>Fastq file</th><th>number of kmers</th><th>number of reads</th></tr>")
+            for fastq in self.counts.meta['fastq_files'].items():
+                msg_fastq_info.append("<tr>"
+                                    f"<td>{fastq[0]}</td>"
+                                    f"<td>{fastq[1][0]}</td>"
+                                    f"<td>{fastq[1][1]}</td>"
+                                    "</tr>")
+            msg_fastq_info.append("<tr><td>Total</td>"
+                                 f"<td>{self.counts.meta['total_kmers']}</td>"
+                                 f"<td>{self.counts.meta['total_reads']}</td>"
+                                 "</tr>")
+            msg_fastq_info.append("</tbody></table>")
+            msg_fastq_info.append("</details>")
+            print("fastq files info:", self.counts.meta['fastq_files'])
+            print("read:", self.counts.meta['total_reads'])
+            print("kmers:", self.counts.meta['total_kmers'])
+
+
+        ### General description of kmerexplor
         msg_desc = (
             "<p><strong>KmerExploR</strong> visualization of your RNA-seq basic features is separated into several sections/subsections:</p>",
             "<p><strong>Basic Features</strong></p>",
@@ -454,7 +484,7 @@ class HTML:
             "    <li>Species: what is/are the species present into my samples ?</li>",
             "</ul>",
             "<p>For each subsection, a graph shows the quantification of predictor genes (Y axis, mean k-mer counts normalized per billion of k-mers in the sample) in each RNA-seq sample of your dataset (X axis). More details on the predictor genes and their selection to answer a specific biological question are described into the corresponding subsections.</p>",
-            "<em>Citation: ref paper Kmerator Suite (?)<em>",
+            "<em>Citation: <a href='https://pubmed.ncbi.nlm.nih.gov/34179780/' target='_blank'>Kmerator Suite</a>.<em>",
         )
         # build Javascript code to home page
         homejs = "\n// Home page\n"
@@ -471,10 +501,12 @@ class HTML:
         homejs += "    desc_html.innerHTML = '';\n"
         homejs += "    // content of Home page\n"
         homejs += '    home_html.innerHTML += "' + ''.join(msg_info) + '";\n'
+        homejs += '    home_html.innerHTML += "' + ''.join(msg_fastq_info) + '";\n'
         homejs += "    home_html.innerHTML += '<hr />';\n"
         homejs += '    home_html.innerHTML += "' + ''.join(msg_desc) + '";\n'
         homejs += "    };\n"
 
+        
 
         ### write javascript code
         dest = os.path.join(self.tree_dir, self.scripts_file)

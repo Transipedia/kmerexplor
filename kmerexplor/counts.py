@@ -152,7 +152,7 @@ class Counts:
                 summary_files.append(f"{'.'.join(file[:-2])}.summary")
             else:
                 summary_files.append(f"{'.'.join(file[:-1])}.summary")
-        ### Add reads and kmers numbers for each sample in tags.meta
+        ### Add info for each sample in tags.meta
         for file in summary_files:
             if os.path.exists(file):
                 fastq = os.path.basename('.'.join(file.split('.')[:-1]))
@@ -163,10 +163,12 @@ class Counts:
                             nkmers = row.split()[1]
                             self.tags['meta']['fastq_files'][fastq][0] = nkmers
                             self.tags['meta']['total_kmers'] += int(nkmers)
-                        if row.startswith('total_reads'):
+                        elif row.startswith('total_reads'):
                             nreads = row.split()[1]
                             self.tags['meta']['fastq_files'][fastq][1] = nreads
                             self.tags['meta']['total_reads'] += int(nreads)
+
+
 
 
     def _set_counts_mean(self):

@@ -437,33 +437,31 @@ class HTML:
         ### information of analysis (samples, version, etc.)
         msg_info = []
         msg_info.append("<p>Mode: {}</p>".format(self.counts.mode))
-        msg_info.append("<p>{} version: {}</p>".format(self.info.APPNAME, self.info.VERSION))
+        msg_info.append("<p>Version: {}</p>".format(self.info.VERSION))
         if args.scale != 1:
             msg_info.append("<p>Scale: x{}</p>".format(args.scale))
         msg_info.append("<details><p><summary>{} samples analysed</summary></p>".format(len(self.counts.samples)))
         msg_info.append("<p>{}</p></details>".format(" - ".join(self.counts.samples)))
         
-        ### Information on fastq files
-        msg_fastq_info = []
+        ### Information from countTags summary
+        msg_counttags_info = []
         if self.counts.meta['fastq_files']:
-            msg_fastq_info.append("<details><p><summary>About fastq files</summary></p>")
-            msg_fastq_info.append("<table id='fastq-info'><tbody>")
-            msg_fastq_info.append("<tr><th>Fastq file</th><th>number of kmers</th><th>number of reads</th></tr>")
+            msg_counttags_info.append("<details><p><summary>About fastq files</summary></p>")
+            msg_counttags_info.append("<table id='fastq-info'><tbody>")
+            msg_counttags_info.append("<tr><th>Fastq file</th><th>number of kmers*</th><th>number of reads</th></tr>")
             for fastq in self.counts.meta['fastq_files'].items():
-                msg_fastq_info.append("<tr>"
+                msg_counttags_info.append("<tr>"
                                     f"<td>{fastq[0]}</td>"
                                     f"<td>{fastq[1][0]}</td>"
                                     f"<td>{fastq[1][1]}</td>"
                                     "</tr>")
-            msg_fastq_info.append("<tr><td>Total</td>"
+            msg_counttags_info.append("<tr><td>Total</td>"
                                  f"<td>{self.counts.meta['total_kmers']}</td>"
                                  f"<td>{self.counts.meta['total_reads']}</td>"
                                  "</tr>")
-            msg_fastq_info.append("</tbody></table>")
-            msg_fastq_info.append("</details>")
-            print("fastq files info:", self.counts.meta['fastq_files'])
-            print("read:", self.counts.meta['total_reads'])
-            print("kmers:", self.counts.meta['total_kmers'])
+            msg_counttags_info.append("</tbody></table>")
+            msg_counttags_info.append("</p><em>*kmer length is fixed at 31</em></p>")
+            msg_counttags_info.append("</details>")
 
 
         ### General description of kmerexplor
@@ -501,7 +499,7 @@ class HTML:
         homejs += "    desc_html.innerHTML = '';\n"
         homejs += "    // content of Home page\n"
         homejs += '    home_html.innerHTML += "' + ''.join(msg_info) + '";\n'
-        homejs += '    home_html.innerHTML += "' + ''.join(msg_fastq_info) + '";\n'
+        homejs += '    home_html.innerHTML += "' + ''.join(msg_counttags_info) + '";\n'
         homejs += "    home_html.innerHTML += '<hr />';\n"
         homejs += '    home_html.innerHTML += "' + ''.join(msg_desc) + '";\n'
         homejs += "    };\n"

@@ -8,3 +8,6 @@ build/
 
 # kmerexplor results
 kmerexplor-results/
+
+# other
+*.backup

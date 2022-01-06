@@ -442,7 +442,7 @@ class HTML:
             msg_info.append("<p>Scale: x{}</p>".format(args.scale))
         msg_info.append("<details><p><summary>{} samples analysed</summary></p>".format(len(self.counts.samples)))
         msg_info.append("<p>{}</p></details>".format(" - ".join(self.counts.samples)))
-        
+
         ### Information on fastq files
         msg_fastq_info = []
         if self.counts.meta['fastq_files']:
@@ -461,9 +461,9 @@ class HTML:
                                  "</tr>")
             msg_fastq_info.append("</tbody></table>")
             msg_fastq_info.append("</details>")
-            print("fastq files info:", self.counts.meta['fastq_files'])
-            print("read:", self.counts.meta['total_reads'])
-            print("kmers:", self.counts.meta['total_kmers'])
+            # ~ print("fastq files info:", self.counts.meta['fastq_files'])
+            # ~ print("read:", self.counts.meta['total_reads'])
+            # ~ print("kmers:", self.counts.meta['total_kmers'])
 
 
         ### General description of kmerexplor
@@ -506,7 +506,7 @@ class HTML:
         homejs += '    home_html.innerHTML += "' + ''.join(msg_desc) + '";\n'
         homejs += "    };\n"
 
-        
+
 
         ### write javascript code
         dest = os.path.join(self.tree_dir, self.scripts_file)

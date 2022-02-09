@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding:utf8 -*-
 
 
 """ Module Doc
@@ -47,7 +46,7 @@ def main():
     try:
         run(args)
     except KeyboardInterrupt:
-        print(f"Process interrupted by user")
+        print(f"Process interrupted by user", file=sys.stderr)
         exit_gracefully(args)
 
 
@@ -85,18 +84,18 @@ def run(args):
                 files_in_error.append(errmsg)
         ### If a file(s) is not valid, exit with error message.
         if files_in_error:
-            print(*files_in_error, sep='\n')
+            print(*files_in_error, sep='\n', file=sys.stderr)
             sys.exit(exit_gracefully(args))
         ### If a mix of valid file type are found, exit
         if len(valid_types) != 1:
-            print("Multiples valid type found ({}).".format(*valid_types))
+            print("Multiples valid type found ({}).".format(*valid_types), file=sys.stderr)
         files_type = next(iter(valid_types))
 
     ### 4. If fastq files, determine paired (if '--paired' argument is specified)
     if files_type == 'fastq':
         sample_list = set_sample_list(files, args, files_type)
         if not sample_list:
-            print("\n Error: no samples {} found\n".format('single' if args.single else 'paired'))
+            print("\n Error: no samples {} found\n".format('single' if args.single else 'paired'), file=sys.stderr)
             sys.exit(exit_gracefully(args, files_type))
 
     ### 5. Handle tags
@@ -105,7 +104,7 @@ def run(args):
     ### 6. If input files are fastq, run countTags (Multiprocessed)
     if files_type == 'fastq':
         ### Compute countTags with multi processing (use --core to specify cores counts)
-        sys.stderr.write("\n ✨✨ Starting countTags, please wait.\n\n")
+        sys.stdout.write("\n ✨✨ Starting countTags, please wait.\n\n")
         with multiprocessing.Pool(processes=nprocs) as pool:
             results = pool.starmap_async(do_countTags, [(sample, tags_file, kmer_size, args) for sample in sample_list])
             results.wait()
@@ -114,12 +113,12 @@ def run(args):
         samples_path = args.files
 
     ### 7. merge countTags tables
-    sys.stderr.write("\n ✨✨ Starting merge of counts.\n")
+    sys.stdout.write("\n ✨✨ Starting merge of counts.\n")
     samples_path.sort()
     counts = Counts(samples_path, args)
 
     ### 8. Build results as html pages and tsv table
-    sys.stderr.write("\n ✨✨ Build output html page.\n")
+    sys.stdout.write("\n ✨✨ Build output html page.\n")
     table = TSV(counts, args)             # create TSV file
     charts = HTML(counts, args, info)      # create résults in html format
 
@@ -136,18 +135,19 @@ def usage():
     """
 
     ### Text at the end (command examples)
-    epilog  = "Examples:\n"
-    epilog += "\n # Mandatory: -p for paired-end or -s for single:\n"
-    epilog += " %(prog)s -p path/to/*.fastq.gz\n"
-    epilog += "\n # -c for multithreading, -k to keep counts (input must be fastq):\n"
-    epilog += " %(prog)s -p -c 16 -k path/to/*.fastq.gz\n"
-    epilog += "\n # You can skip the counting step thanks to countTags output (see -k option):\n"
-    epilog += " %(prog)s -p path/to/countTags/files/*.tsv\n"
-    epilog += "\n # -o to choose your directory output (directory will be created),"
-    epilog += "\n # --title to show title in results:\n"
-    epilog += " %(prog)s -p -o output_dir --title 'Title displayed on the html page' dir/*.fastq.gz'\n"
-    epilog += "\n # Advanced: use your own tag file and config.yaml file:\n"
-    epilog += " %(prog)s -p --tags my_tags.tsv --config my_config.yaml dir/*.fast.gz\n"
+    epilog  = ("Examples:\n"
+            "\n # Mandatory: -p for paired-end or -s for single:\n"
+            " %(prog)s -p path/to/*.fastq.gz\n"
+            "\n # -c for multithreading, -k to keep counts (input must be fastq):\n"
+            " %(prog)s -p -c 16 -k path/to/*.fastq.gz\n"
+            "\n # You can skip the counting step thanks to countTags output (see -k option):\n"
+            " %(prog)s -p path/to/countTags/files/*.tsv\n"
+            "\n # -o to choose your directory output (directory will be created),"
+            "\n # --title to show title in results:\n"
+            " %(prog)s -p -o output_dir --title 'Title displayed on the html page' dir/*.fastq.gz'\n"
+            "\n # Advanced: use your own tag file and config.yaml file:\n"
+            " %(prog)s -p --tags my_tags.tsv --config my_config.yaml dir/*.fast.gz\n"
+    )
     ### Argparse
     parser = argparse.ArgumentParser(epilog=epilog,
         formatter_class=argparse.RawDescriptionHelpFormatter,

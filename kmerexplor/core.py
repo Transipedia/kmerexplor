@@ -114,7 +114,7 @@ def run(args, config):
 
     ### 4. Handle tags
     tags_file = get_tags_file(args)
-    tags_file_desc = f"{tags_file.split('.')[0]}.md"
+    tags_file_desc = f"{os.path.splitext(tags_file.rstrip('.gz'))[0]}.md"
 
     ### 5. If input files are fastq, run countTags (Multiprocessed)
     if files_type == 'fastq':

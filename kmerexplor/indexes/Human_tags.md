@@ -9,7 +9,7 @@
 * Read position biases: is there a read coverage bias from 5' to 3' ends ?
 
 
-** Contamination**
+**Contamination**
 
 * HeLa: are my RNA-seq data contaminated by HeLa (presence of HeLa-derived human papillomavirus 18) ?
 * Mycoplasma: are my RNA-seq data contaminated by mycoplasmas ?

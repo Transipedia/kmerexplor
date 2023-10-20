@@ -49,20 +49,18 @@ You can use the following dataset to test the software and to illustrate the dif
 
 ## Installation
 
-`KmerExploR` needs `yaml` python module,
+`KmerExploR` needs `yaml` and `markdown` python module,
 We recommand tu use ``pip` as it install everything you need automatically.
 
 ### Option 1: install KmerExploR with pip
 
 
 ```
-# as user
-python3 -m pip install --user kmerexplor
-
-# in virtualenv or as root
-python3 -m pip install kmerexplor
+pip install kmerexplor
 ```
-**Nota**: using pip as user without virtual environment, make sure your PATH variable include `~/.local/bin`.
+
+**Nota**: make sure your PATH variable include `~/.local/bin`.
+
 
 ### Option 2: install KmerExploR with git by cloning repository
 

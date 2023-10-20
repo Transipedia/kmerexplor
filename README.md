@@ -116,55 +116,51 @@ kmerexplor-results
 
 ## Usage
 
- 
 Without options or with `--help`, `KmerExploR` returns Help
 
- 
- ```
-usage: kmerexplor [-h] (-s | -p) [-k] [-d] [-o <output_dir>]
-                  [--tmp-dir <tmp_dir>] [--config config.yaml] [-t <tag_file>]
-                  [-a <tag_file>] [--dump-config [config.yaml]] [--show-tags]
-                  [--title TITLE] [-y] [-c <cores>] [-v]
+```
+usage: kmerexplor [-h] (-s | -p) [-k <int>] [-K] [-d] [-o <output_dir>] 
+                  [--tmp-dir <tmp_dir>] [--config <file_name>] [-t <tag_file>] 
+                  [--dump-config [file_name]] [--show-tags]
+                  [--title <string>] [-y] [-c <int>] [-v]
                   <file1> ... [<file1> ... ...]
 
 positional arguments:
-  <file1> ...           fastq or fastq.gz or tsv countTag files.
+  <file1> ...           fastq or fastq.gz or tsv countTags output files.
 
 optional arguments:
   -h, --help            show this help message and exit
   -s, --single          when samples are single.
   -p, --paired          when samples are paired.
-  -k, --keep-counts     keep countTags outputs.
+  -k <int>, --kmer-size <int>
+                        kmer size (default 31).
+  -K, --keep-counts     keep countTags outputs.
   -d, --debug           debug.
   -o <output_dir>, --output <output_dir>
                         output directory (default: "./kmerexplor-results").
   --tmp-dir <tmp_dir>   temporary files directory.
-  --title TITLE         title to be displayed in the html page.
+  --title <string>      title to be displayed in the html page.
   -y, --yes, --assume-yes
                         assume yes to all prompt answers.
-  -c <cores>, --cores <cores>
-                        specify the number of files which can be processed
-                        simultaneously by countTags. (default: 1). Valid when
+  -c <int>, --cores <int>
+                        specify the number of files which can be processed 
+                        simultaneously by countTags. (default: 1). Valid when 
                         inputs are fastq files.
   -v, --version         show program's version number and exit
 
 advanced features:
-  --config config.yaml  alternate config yaml file of each category (default:
-                        built-in "config.yaml").
+  --config <file_name>  alternate config yaml file.
   -t <tag_file>, --tags <tag_file>
                         alternate tag file.
-  -a <tag_file>, --add-tags <tag_file>
-                        additional tag file.
 
 extra features:
-  --dump-config [config.yaml]
-                        dump builtin config file as specified name to current
+  --dump-config [file_name]
+                        dump builtin config file as specified name to current 
                         directory and exit (default name: config.yaml).
   --show-tags           print builtin categories and predictors and exit.
 
+```
 
- ```
- 
 ## Options
 
 ### -k --keep-counts
@@ -198,7 +194,11 @@ AACGCCGCGCGTGACAACAAGAAGACCAGGA Histone-H2AFJ-ENST00000501744.2.fa.kmer58
 - `H2AFJ` : seq_id
 - `ENST00000501744.2.fa.kmer58` : seq_def (not used)
 
+
 __Warning__ : `config.yaml` file must refer to the same categories than tags file, otherwise KmerExploR does not display results (`Histone` in the example).
+
+**Notice** : the description of a set of tags can can be displayed on the main home page by creating a markdown file of the same name, suffixed with ``.md`` (eg: my-tags.tsv -> my-tags.md).
+
 
 ### --config config.yaml
 
@@ -245,13 +245,13 @@ Mandatory: `-p` for paired-end or `-s` for single:
 kmerexplor -p path/to/*.fastq.gz
 ```
  
-`-c` for multithreading, `-k` to keep counts (input must be fastq):
+`-c` for multithreading, `-K` to keep counts (input must be fastq):
 
 ``` 
-kmerexplor -p -c 16 -k path/to/*.fastq.gz
+kmerexplor -p -c 16 -K path/to/*.fastq.gz
 ```
 
-You can skip the counting step thanks to countTags output (see `-k` option):
+You can skip the counting step thanks to countTags output (see `-K` option):
 
 ```
 kmerexplor -p path/to/countTags/files/*.tsv

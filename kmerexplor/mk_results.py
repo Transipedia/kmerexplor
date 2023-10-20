@@ -9,14 +9,11 @@ Build results files
 - a html file to show graphical results (associated with css and javascript files)
 """
 
-
 import os
 import sys
-import yaml
+import markdown
+
 from counts import Counts
-
-
-APPPATH = os.path.dirname(os.path.realpath(__file__))
 
 
 def main():
@@ -50,15 +47,16 @@ class HTML:
     - echart-en-min.js: echart javascript library
      """
 
-    def __init__(self, counts, args, info):
+    def __init__(self, counts, args, info, config, tags_file_desc):
         """ Create all html, javascript and css files to show results"""
         self.counts = counts
         self.args = args
         self.scripts_file = 'scripts.js'
         self.htmlfile = os.path.join(args.output, 'kmerexplor.html')
         self.scale_factor = args.scale
-        self.config = self._config()
+        self.config = config
         self.info = info
+        self.tags_file_desc = tags_file_desc
         ### make tree directories
         self.tree_dir = self._mk_tree_dir(args)
         ### Create index.html file
@@ -75,15 +73,6 @@ class HTML:
         self._write_desc_js()
         ### Create Javascript code to add Home page
         self._write_home_js(args)
-
-    def _config(self):
-        """ load config file """
-        if os.path.isfile(self.args.config):
-            with open(self.args.config) as stream:
-                return yaml.safe_load(stream)
-        else:
-            with open(os.path.join(APPPATH, self.args.config)) as stream:
-                return yaml.safe_load(stream)
 
     def _mk_tree_dir(self, args):
         """ Function doc """
@@ -486,6 +475,12 @@ class HTML:
             "<p>For each subsection, a graph shows the quantification of predictor genes (Y axis, mean k-mer counts normalized per billion of k-mers in the sample) in each RNA-seq sample of your dataset (X axis). More details on the predictor genes and their selection to answer a specific biological question are described into the corresponding subsections.</p>",
             "<em>Citation: <a href='https://pubmed.ncbi.nlm.nih.gov/34179780/' target='_blank'>Kmerator Suite</a>.<em>",
         )
+        tags_desc = '<h3>Description</h3>'
+        tags_desc += f"<p>You can create a markdown file {self.tags_file_desc!r} to describe the tag set. It will be displayed here.</p>"
+        if os.path.isfile(self.tags_file_desc):
+            with open(self.tags_file_desc) as f:
+                text = f.read()
+                tags_desc = markdown.markdown(text, extensions=['attr_list']).replace('\n', '').replace('"', "'")
         # build Javascript code to home page
         homejs = "\n// Home page\n"
         homejs += "function home() {\n"
@@ -503,9 +498,8 @@ class HTML:
         homejs += '    home_html.innerHTML += "' + ''.join(msg_info) + '";\n'
         homejs += '    home_html.innerHTML += "' + ''.join(msg_fastq_info) + '";\n'
         homejs += "    home_html.innerHTML += '<hr />';\n"
-        homejs += '    home_html.innerHTML += "' + ''.join(msg_desc) + '";\n'
+        homejs += f'    home_html.innerHTML += "{tags_desc}";\n'
         homejs += "    };\n"
-
 
 
         ### write javascript code

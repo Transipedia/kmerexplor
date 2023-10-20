@@ -6,8 +6,8 @@ import shutil
 
 
 APPPATH = os.path.dirname(os.path.realpath(__file__))
-SPECIES = {
-    'human': os.path.join(APPPATH, 'indexes', 'Human_tags.tsv.gz'),
+BUILTIN_TAGS = {
+    'human-quality': os.path.join(APPPATH, 'indexes', 'Human_tags.tsv.gz'),
     #'mouse': os.path.join(APPPATH, 'indexes', 'Mouse_tags.tsv.gz'),
 }
 
@@ -18,9 +18,9 @@ def get_tags_file(args):
     ## --tags used to specify tags file
     if args.tags:
         tags_file = args.tags
-    ## tags file specified from --specie option (default: human)
+    ## tags file specified from --builtin-tags option (default: human)
     else:
-        tags_file = SPECIES[args.specie]
+        tags_file = BUILTIN_TAGS[args.builtin_tags]
     ### Is tag file here ?
     if not os.path.isfile(tags_file):
         print("\n FileError: tags file '{}' not Found.\n".format(tags_file))

@@ -28,6 +28,7 @@ import tempfile
 import gzip
 import glob
 import subprocess
+import yaml
 
 from common import *
 import checkFile as cf
@@ -38,19 +39,35 @@ import info
 from opt_actions import DumpAction, ShowTagsAction
 
 
+APPPATH = os.path.dirname(os.path.realpath(__file__))
+
+
 def main():
     """ Handle keyboard interrupt commands and launch program """
     ### 1. Manage command line arguments
     args = usage()
+    ### load config file
+    config = config2dict(args)
     ### If "ctrl C" is set, quit after executing exit_gracefully function
     try:
-        run(args)
+        run(args, config)
     except KeyboardInterrupt:
         print(f"Process interrupted by user", file=sys.stderr)
         exit_gracefully(args)
 
 
-def run(args):
+def config2dict(args):
+    """ Load config yaml file as dict """
+    try:
+        with open(args.config) as stream:
+            return yaml.safe_load(stream)
+    except FileNotFoundError:
+        sys.exit(f"Error: no such file or directory: {args.config!r}")
+    except yaml.scanner.ScannerError as err:
+        sys.exit(f"Error {err}")
+
+
+def run(args, config):
     """ Function doc """
     nprocs, files = args.cores, args.files
     if args.debug: print("Arguments:", args)
@@ -66,10 +83,7 @@ def run(args):
         ## Else counts will be removed at the exit_gracefully() function
         args.counts_dir = args.tmp_dir
 
-    ### 2. get kmers size
-    kmer_size = get_kmers_size(args)
-
-    ### 3. Test validity files (Multiprocessed)
+    ### 2. Test validity files (Multiprocessed)
     with multiprocessing.Pool(processes=nprocs) as pool:
         # results = pool.map_async(partial(is_valid, args),files)        # Alternative
         results = pool.starmap_async(is_valid, [(file, args) for file in files])
@@ -91,42 +105,84 @@ def run(args):
             print("Multiples valid type found ({}).".format(*valid_types), file=sys.stderr)
         files_type = next(iter(valid_types))
 
-    ### 4. If fastq files, determine paired (if '--paired' argument is specified)
+    ### 3. If fastq files, determine paired (if '--paired' argument is specified)
     if files_type == 'fastq':
         sample_list = set_sample_list(files, args, files_type)
         if not sample_list:
             print("\n Error: no samples {} found\n".format('single' if args.single else 'paired'), file=sys.stderr)
             sys.exit(exit_gracefully(args, files_type))
 
-    ### 5. Handle tags
+    ### 4. Handle tags
     tags_file = get_tags_file(args)
+    tags_file_desc = f"{tags_file.split('.')[0]}.md"
 
-    ### 6. If input files are fastq, run countTags (Multiprocessed)
+    ### 5. If input files are fastq, run countTags (Multiprocessed)
     if files_type == 'fastq':
         ### Compute countTags with multi processing (use --core to specify cores counts)
         sys.stdout.write("\n ✨✨ Starting countTags, please wait.\n\n")
         with multiprocessing.Pool(processes=nprocs) as pool:
-            results = pool.starmap_async(do_countTags, [(sample, tags_file, kmer_size, args) for sample in sample_list])
+            results = pool.starmap_async(do_countTags, [(sample, tags_file, args) for sample in sample_list])
             results.wait()
         samples_path = [f for f in glob.glob("{}/*.tsv".format(args.counts_dir))]
     else:
         samples_path = args.files
 
-    ### 7. merge countTags tables
+    ### 6. merge countTags tables
     sys.stdout.write("\n ✨✨ Starting merge of counts.\n")
     samples_path.sort()
     counts = Counts(samples_path, args)
 
-    ### 8. Build results as html pages and tsv table
+    ### 7. Build results as html pages and tsv table
     sys.stdout.write("\n ✨✨ Build output html page.\n")
-    table = TSV(counts, args)             # create TSV file
-    charts = HTML(counts, args, info)      # create résults in html format
+    table = TSV(counts, args)                                   # create TSV file
+    charts = HTML(counts, args, info, config, tags_file_desc)   # create résults in html format
 
-    ### 9. show results
+    ### 8. show results
     show_res(args,counts, table.tsvfile, charts.htmlfile, files_type)
 
-    ### 10. exit gracefully program
+    ### 9. exit gracefully program
     exit_gracefully(args, files_type)
+
+
+
+def is_valid(file, args):
+    """ Function doc """
+    f = cf.File(file)
+    if args.debug and f.is_valid:
+        print("{} is valid {} file.".format(file, f.type))
+    return f.type, f.errmsg
+
+
+def set_sample_list(files, args, files_type):
+    """ Function doc """
+    if files_type == 'fastq':
+        return samples.find(files, args)
+
+
+def do_countTags(sample, tags_file, args):
+    """ Compute countTags """
+    countTag_cmd = '{0}/countTags --stranded --alltags --normalize --tag-names --merge-counts \
+                    -b --merge-counts-colname {4} -k {1} \
+                    --summary {5}/{4}.summary \
+                    -i {2} {3} > {5}/{4}.tsv'.format(APPPATH, args.kmer_size, tags_file, sample[0],
+                                                    ''.join(sample[1:]), args.counts_dir)
+    # ~ print(countTag_cmd)
+    if args.debug: print("{}: Start countTags processing.\n{}".format(sample[1], countTag_cmd))
+    os.popen(countTag_cmd).read()
+    print("  {}: countTags processed.".format(''.join(sample[1:])))
+
+
+def show_res(args, tags, tsvfile, htmlfile, files_type):
+    """ output """
+    print("\n ✨✨ Work is done, show:\n\n {}\n {}".format(os.path.abspath(tsvfile),
+                                                           os.path.abspath(htmlfile)))
+    if args.keep_counts and files_type == 'fastq' : print(" {}/".format(os.path.abspath(args.counts_dir)))
+    print("\n")
+    ### Launch results in a browser if possible
+    try:
+        subprocess.Popen(['x-www-browser', htmlfile])
+    except:
+        pass
 
 
 def usage():
@@ -157,7 +213,7 @@ def usage():
     advanced_group = parser.add_argument_group(title='advanced features')
     special_group = parser.add_argument_group(title='extra features')
     parser.add_argument('files',
-                        help='fastq or fastq.gz or tsv countTag files.',
+                        help='fastq or fastq.gz or tsv countTags output files.',
                         nargs='+',
                         default=sys.stdin,
                         metavar=('<file1> ...'),
@@ -170,7 +226,13 @@ def usage():
                         action='store_true',
                         help='when samples are paired.',
     )
-    parser.add_argument('-k', '--keep-counts',
+    parser.add_argument('-k', '--kmer-size',
+                        type=int,
+                        help='kmer size (default 31).',
+                        default=31,
+                        metavar="<int>",
+    )
+    parser.add_argument('-K', '--keep-counts',
                         action='store_true',
                         help='keep countTags outputs.',
     )
@@ -179,10 +241,10 @@ def usage():
                         help='debug.',
     )
     ### Depreciated : hidden for the moment
-    parser.add_argument('-S', '--specie',
+    parser.add_argument('-b', '--builtin-tags',
                         help=argparse.SUPPRESS,
-                        default='human',
-                        choices=[s for s in SPECIES],
+                        default='human-quality',
+                        choices=[s for s in BUILTIN_TAGS],
     )
     parser.add_argument('-o', '--output',
                         default='./{}-results'.format(info.APPNAME.lower()),
@@ -203,23 +265,23 @@ def usage():
                         metavar=('scale'),
     )
     advanced_group.add_argument('--config',
-                        default='config.yaml',
-                        help='alternate config yaml file of each category (default: built-in "config.yaml").',
-                        metavar='config.yaml',
+                        default=os.path.join(APPPATH, "config.yaml"),
+                        help='alternate config yaml file.',
+                        metavar='<file_name>',
     )
     advanced_group.add_argument('-t', '--tags',
                         help='alternate tag file.',
                         metavar='<tag_file>',
     )
     advanced_group.add_argument('-a', '--add-tags',
-                        help='additional tag file.',
+                        help=argparse.SUPPRESS, # 'additional tag file.',
                         metavar='<tag_file>',
     )
     special_group.add_argument('--dump-config',
                         action=DumpAction,
                         arg='file',
                         nargs='?',
-                        metavar='config.yaml',
+                        metavar='file_name',
                         help='dump builtin config file as specified name to current directory and exit (default name: config.yaml).',
     )
     special_group.add_argument('--show-tags',
@@ -230,6 +292,7 @@ def usage():
     parser.add_argument('--title',
                         default='',
                         help='title to be displayed in the html page.',
+                        metavar="<string>"
     )
     parser.add_argument('-y', '--yes', '--assume-yes',
                         action='store_true',
@@ -240,7 +303,7 @@ def usage():
                         type=int,
                         help='specify the number of files which can be processed simultaneously' +
                         ' by countTags. (default: 1). Valid when inputs are fastq files.',
-                        metavar=('<cores>'),
+                        metavar=('<int>'),
     )
     parser.add_argument('-v', '--version',
                         action='version',
@@ -251,59 +314,6 @@ def usage():
         parser.print_help()
         sys.exit()
     return parser.parse_args()
-
-
-def is_valid(file, args):
-    """ Function doc """
-    f = cf.File(file)
-    if args.debug and f.is_valid:
-        print("{} is valid {} file.".format(file, f.type))
-    return f.type, f.errmsg
-
-
-def set_sample_list(files, args, files_type):
-    """ Function doc """
-    if files_type == 'fastq':
-        return samples.find(files, args)
-
-
-def get_kmers_size(args):
-    """ Function doc """
-    tags_file = get_tags_file(args)
-    ### tags file is gzipped
-    if tags_file[-3:] == '.gz':
-        with gzip.open(tags_file) as tagsf:
-            return len(tagsf.readline().split()[0])
-    ### tags file is plain text
-    else:
-        with open(tags_file) as tagsf:
-            return len(tagsf.readline().split()[0])
-
-
-def do_countTags(sample, tags_file, kmer_size, args):
-    """ Compute countTags """
-    countTag_cmd = '{0}/countTags --stranded --normalize --tag-names --merge-counts \
-                    -b --merge-counts-colname {4} -k {1} \
-                    --summary {5}/{4}.summary \
-                    -i {2} {3} > {5}/{4}.tsv'.format(APPPATH, kmer_size, tags_file, sample[0],
-                                                    ''.join(sample[1:]), args.counts_dir)
-    if args.debug: print("{}: Start countTags processing.\n{}".format(sample[1], countTag_cmd))
-    os.popen(countTag_cmd).read()
-    print("  {}: countTags processed.".format(''.join(sample[1:])))
-
-
-def show_res(args, tags, tsvfile, htmlfile, files_type):
-    """ output """
-    print("\n ✨✨ Work is done, show:\n\n {}\n {}".format(os.path.abspath(tsvfile),
-                                                           os.path.abspath(htmlfile)))
-    if args.keep_counts and files_type == 'fastq' : print(" {}/".format(os.path.abspath(args.counts_dir)))
-    print("\n")
-    ### Launch results in a browser if possible
-    try:
-        subprocess.Popen(['x-www-browser', htmlfile])
-    except:
-        pass
-
 
 
 if __name__ == "__main__":

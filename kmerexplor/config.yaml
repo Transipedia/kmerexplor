@@ -11,7 +11,8 @@ Basic_features:   # Meta category, show in left sidenav (underscores are replace
                   # 2 values separated by commas are admitted (e.g. threshold: 120, -120).
     chart_type: bar
                   # Only bar is admitted at this time.
-    # as_percent: # decomment to show result as percentage.
+    # as_percent: # decomment to show result as percentage (show Gender).
+    #~ as_fastq:  # if decommented, each fastq file is showed instead sample (show Orientation).
     chart_theme: light
                   # light, dark, or nothing (default theme: nothing)
     desc:         # More details on the graph, located under it
@@ -23,6 +24,7 @@ Basic_features:   # Meta category, show in left sidenav (underscores are replace
     sidenav: Orientation
     title: Orientation
     threshold: # 230, -230
+    as_fastq:
     chart_type: bar
     chart_theme: light
     desc:

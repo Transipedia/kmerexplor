@@ -249,15 +249,15 @@ class Counts:
             sys.exit()
 
 
-    def get_by_category(self, seq_type, mode=None):
+    def get_by_category(self, categ, mode=None):
         """ get counts by category """
         results = []
         ### By default, use with invoked mode (paired or single)
         mode = mode or self.mode
         ### get counts by category
-        if seq_type in self.tags['counts']:
-            for seq_id in self.tags['counts'][seq_type]:
-                counts = self.tags['counts'][seq_type][seq_id][mode]
+        if categ in self.tags['counts']:
+            for seq_id in self.tags['counts'][categ]:
+                counts = self.tags['counts'][categ][seq_id][mode]
                 results.append((seq_id, counts))
             return results
         else:

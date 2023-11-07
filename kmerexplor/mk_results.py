@@ -184,13 +184,15 @@ class HTML:
         ### firstly, set samples variables
         variables_js += "\n// Samples array variable\n"
         variables_js += "var samples = ['Samples', {}];\n".format(", ".join("'{}'".format(sample) for sample in self.counts.samples))
-        variables_js += "var samples_orientation = ['Samples', {}];\n".format(", ".join("'{}'".format(sample) for sample in self.counts.fastq))
+        variables_js += "var samples_as_fastq = ['Samples', {}];\n".format(", ".join("'{}'".format(sample) for sample in self.counts.fastq))
         ### With the help of config.yaml file, build config variable for each categories
         for metacat in self.config:
             for categ, conf in self.config[metacat].items():
                 ### set particular variables
                 ## number of seq_id per category
-                if categ == 'Orientation':
+                as_fastq = True if 'as_fastq' in conf else False
+                if as_fastq:
+                # ~ if categ == 'Orientation':
                     counts_set = self.counts.get_by_category(categ, mode='single')
                 else:
                     counts_set = self.counts.get_by_category(categ)
@@ -203,7 +205,8 @@ class HTML:
                         counts_set.sort()
                     nb_categ = nb_legend = len(counts_set)
                     ### special case: category
-                    if categ == 'Orientation':
+                    if as_fastq:
+                    # ~ if categ == 'Orientation':
                         nb_legend //= 4
                     ## threshold
                     if 'as_percent' not in conf:
@@ -276,6 +279,7 @@ class HTML:
                     variables_js += "    yAxis_max: {},\n".format(yAxys_max)
                     variables_js += "    toolbox_type: ['stack', 'tiled'],\n"
                     variables_js += '    title_text: "{}",\n'.format(conf['title'])
+                    variables_js += '    show_fastq: {},\n'.format('true' if as_fastq else 'false')
                     variables_js += "    legend_padding_top: [40, 30, 0, 30],\n"
                     variables_js += "    grid_top: '{}%',\n".format(grid_top)
                     variables_js += "    nb_seqId: {},\n".format(nb_categ)
@@ -343,8 +347,8 @@ class HTML:
         chartjs += "    series = set_series(category);\n"
         chartjs += "    // dataset = samples + dataset\n"
         chartjs += "    if (category.dataset[0][0] != 'Samples') {\n"
-        chartjs += "        if (category.title_text == 'Orientation') {\n"
-        chartjs += "            category.dataset.unshift(samples_orientation);\n"
+        chartjs += "        if (category.show_fastq) {\n"
+        chartjs += "            category.dataset.unshift(samples_as_fastq);\n"
         chartjs += "        } else {\n"
         chartjs += "            category.dataset.unshift(samples);\n"
         chartjs += "        };\n"
@@ -455,26 +459,7 @@ class HTML:
             # ~ print("kmers:", self.counts.meta['total_kmers'])
 
 
-        ### General description of kmerexplor
-        msg_desc = (
-            "<p><strong>KmerExploR</strong> visualization of your RNA-seq basic features is separated into several sections/subsections:</p>",
-            "<p><strong>Basic Features</strong></p>",
-            "<ul>",
-            "    <li>Poly A / Ribo D: are my RNA-seq data based on poly-A selection protocol or ribo-depletion ?</li>",
-            "    <li>Orientation: are my RNA-seq libraries stranded or not ?</li>",
-            "    <li>Y chromosome: what is/are the gender(s) corresponding to my samples ?</li>",
-            "    <li>Read position biases: is there a read coverage bias from 5' to 3' ends ?</li>",
-            "</ul>",
-            "<p><strong>Contamination</strong></p>",
-            "<ul>",
-            "    <li>HeLa: are my RNA-seq data contaminated by HeLa (presence of HeLa-derived human papillomavirus 18) ?</li>",
-            "    <li>Mycoplasma: are my RNA-seq data contaminated by mycoplasmas ? </li>",
-            "    <li>Virus: are my RNA-seq data contaminated by viruses such as hepatitis B virus ?</li>",
-            "    <li>Species: what is/are the species present into my samples ?</li>",
-            "</ul>",
-            "<p>For each subsection, a graph shows the quantification of predictor genes (Y axis, mean k-mer counts normalized per billion of k-mers in the sample) in each RNA-seq sample of your dataset (X axis). More details on the predictor genes and their selection to answer a specific biological question are described into the corresponding subsections.</p>",
-            "<em>Citation: <a href='https://pubmed.ncbi.nlm.nih.gov/34179780/' target='_blank'>Kmerator Suite</a>.<em>",
-        )
+        ### General description of kmerexplor (use markdown file or invite to set it)
         tags_desc = '<h3>Description</h3>'
         tags_desc += f"<p>You can create a markdown file {self.tags_file_desc!r} to describe the tag set. It will be displayed here.</p>"
         if os.path.isfile(self.tags_file_desc):

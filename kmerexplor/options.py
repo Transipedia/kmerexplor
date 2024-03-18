@@ -32,14 +32,15 @@ def handle_args(args):
 
 
 def check_args(args):
-    ### --paired vs --single
-    if not any([args.show_tags, args.dump_config, args.list_tagsets]):
+    special_option = any([args.show_tags, args.dump_config, args.list_tagsets])
+    ### --paired OR --single
+    if not special_option:
         if len([True for i in (args.paired, args.single) if i]) != 1:
             sys.exit("Syntax error: one of the arguments -s/--single -p/--paired is required")
         ### At least one fastq must be define
         if not args.files:
             sys.exit("Syntax error: the following arguments are required: <files1>")
-    ### define user tagset tsv, config yaml, desc md and put them in args
+    ### Define user tagset tsv, config yaml, desc md and put them in args
     user_args_len = len([_ for _ in (args.config, args.tags) if _])
     if user_args_len == 2:
         ### check file presences
@@ -52,7 +53,7 @@ def check_args(args):
         ### Re-define set of tag files
         args.setfiles = {'tags':args.tags, 'config': args.config, 'desc': user_desc_file}
         return
-    elif user_args_len == 1 and not args.show_tags:
+    elif user_args_len == 1 and not special_option:
         sys.exit("SyntaxError: '-C/--config' and '-T/--tags' work together")
     args.setfiles = _get_tagsets(args)
 

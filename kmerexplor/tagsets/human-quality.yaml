@@ -1,0 +1,108 @@
+### config.yaml: parameters to display results in HTML page.
+Basic_features:   # Meta category, show in left sidenav (underscores are replaced by blank)
+  Histones:       # Must match with first item (characters before first dash) of the second column
+                  # in the tabuled index file. Also, they will be used for Javascript function names.
+                  # They must be unique, and contain uniquely letters, digits and underscores
+    sidenav : Poly A / Ribo D
+                  # Show in the left sidebar
+    title: Poly A and Ribo depletion by Histone detection
+                  # Title of the graph
+    threshold: 200
+                  # 2 values separated by commas are admitted (e.g. threshold: 120, -120).
+    chart_type: bar
+                  # Only bar is admitted at this time.
+    # as_percent: # decomment to show result as percentage (show Gender).
+    #~ as_fastq:  # if decommented, each fastq file is showed instead sample (show Orientation).
+    chart_theme: light
+                  # light, dark, or nothing (default theme: nothing)
+    desc:         # More details on the graph, located under it
+      - "Poly A selection" # first line is a title
+      - "<strong>Predictor genes selection:</strong> when total RNA is extracted from a human sample, the most abundant component is ribosomal RNA (rRNA, 80 to 90%, <em>O'Neil et al. (2013)</em>), which must be removed to measure gene/transcript abundances using RNA-seq technology. Commonly used protocols to remove rRNA are polyadenylated mRNA selection (polyA+) and ribo-depletion (Ribo-Zero). To differentiate these 2 protocols, we selected widely expressed histone genes which produce non-polyadenylated transcripts barely detected into polyA+ RNA-seq. These predictor genes are listed in the legend."
+      - "<strong>Specific k-mers quantification:</strong> several specific k-mers designed with Kmerator are associated to each selected histone gene. KmerExploR uses countTags to compute k-mer occurrences number in each RNA-seq sample and calculates the mean count value for each gene (Y axis, mean k-mer counts normalized per billion of k-mers)."
+      - "<strong>Threshold :</strong> the threshold was defined based on several RNA-seq datasets but might not fit perfectly your data. Ribo-depleted samples should be above the threshold and polyA+ below."
+  Orientation:
+    sidenav: Orientation
+    title: Orientation
+    threshold: # 230, -230
+    as_fastq:
+    chart_type: bar
+    chart_theme: light
+    desc:
+      - "Orientation"
+      - "<strong>Predictor genes selection:</strong> paired-end RNA-seq protocol generates 2 fastq files per sample. To determine the orientation of these files (stranded/unstranded) we selected a subset of housekeeping genes from the list previously published by Eisenberg and Levanon (<em>Eisenberg et al. (2013)</em>). These predictor genes are listed in the legend."
+      - "<strong>Specific k-mers quantification and interpretation:</strong> for each predictor gene, we designed specific k-mers with Kmerator and also computed these k-mers reverse-complements. With KmerExploR, forward specific k-mers are counted as positive (Y axis, mean k-mer counts normalized per billion of k-mers), and their reverse-complements are counted as negative. For each predictor gene and both forward and reverse counts, the mean value is calculated. When the samples are stranded, forward and reverse k-mers are expected to be respectively in 2 different fastq files. If  forward and reverse k-mers are equally found in each fastq file (balanced positive and negative counts) the sample is considered as unstranded."
+  Gender:
+    sidenav: Y chromosome
+    title: Y chromosome detection
+    threshold: 5
+    chart_type: bar
+    chart_theme: light
+    desc:
+      - "Gender"
+      - "<strong>Predictor genes selection:</strong> to determine the gender, we selected previously published chromosome Y specific genes (<em>A. A. Maan et al. (2017)</em>) that have an ubiquitous expression. These predictor genes are listed in the legend."
+      - "<strong>Specific k-mers quantification and interpretation:</strong> several specific k-mers designed with Kmerator are associated to each selected chromosome Y gene. KmerExploR uses countTags to compute k-mer occurrences number in each RNA-seq sample and calculates the mean count value for each gene (Y axis, mean k-mer counts normalized per billion of k-mers). Females should have an almost zero expression for all selected genes contrary to males that should express them all."
+  Read_biases:
+    sidenav: Read position biases
+    title: Read position biases
+    threshold:
+    chart_type: bar
+    chart_theme: light
+    as_percent:
+    desc:
+      - "Read position biases"
+      - "<strong>Predictor genes selection:</strong> read coverage bias from 5' to 3' end can be one important parameter to analyse. Indeed, if reads primarily accumulate at the 3’ end of transcripts in poly(A)-selected samples, this might also indicate low RNA quality in the starting material (<em>Conesa et al. (2016)</em>). During mapping process, tools for quality control are used including Picard, RSeQC and Qualimap. Here, to check the uniformity of read coverage, we selected a subset of housekeeping genes from the list previously published by Eisenberg and Levanon (<em>Eisenberg et al. (2013)</em>) : VPS29, SNRPD3, REEP5, RAB7A, PSMB4, PSMB2, GPI, EMC7, CHMP2A and C1orf43."
+      - "<strong>Specific k-mers quantification and interpretation:</strong> for each predictor gene, we designed specific k-mers with Kmerator and distinguished the mean k-mer counts from 5', 3' and CDS regions. Results are presented, for each sample, with the cumulative mean of each region (all predictor gene mean counts are grouped together by region), reported as a percentage (Y axis). In absence of bias, one can expect a conserved proportion of the corresponding region among samples. Conversely, if a bias is present in the data this proportion will be lost."
+
+Contamination:
+  HeLa_HPV18:
+    sidenav: HeLa
+    title: Hela HPV18
+    threshold: 10
+    chart_type: bar
+    chart_theme: light
+    desc:
+      - "Hela contamination"
+      - "<strong>Predictor genes selection:</strong> HeLa is the first immortal human cell line, coming from Henrietta Lacks cancerous tissue samples. Her cancer was triggered by an infection with human papillomavirus type 18 (HPV-18). Nowadays, this cell line is largely used in medical research and HeLa contaminations in other cell types have been observed (<em>Selitsky et al. (2020)</em>). 3 segments of HPV-18 are integrated into HeLa genome on chromosome 8 and include the long control region (LCR), the E6, E7 and E1 genes, and partial coding regions for the E2 and L1 genes (<em>Cantalupo et al. (2015)</em>). From these genes expressed in HeLa cells with specific mutations (<em>Cantalupo et al. (2015)</em>), we selected 60 nt long sequences around each mutation. These predictor gene specific mutations are listed in the legend."
+      - "<strong>Specific k-mers quantification and interpretation:</strong> for each selected HeLa specific mutation 60 nt sequence, we designed specific k-mers with Kmerator. Next, KmerExploR uses countTags to compute k-mer occurrences number in each RNA-seq sample and calculates the mean count value for each selected HeLa specific mutation (Y axis, mean k-mer counts normalized per billion of k-mers). Using this quantification, we are able to highlight potential HeLa contamination."
+  Mycoplasma:
+    sidenav: Mycoplasma
+    title: Mycoplasma
+    threshold: 20
+    chart_type: bar
+    chart_theme: light
+    desc:
+      - "Mycoplasma contamination"
+      - "<strong>Predictor genes selection:</strong> mycoplasma is a common source of cell culture sample contamination and can affect  gene expression. To control  its presence in RNA-seq data, we checked for the most frequent mycoplasma found in cell contamination, according to <em>Drexler et al. (2002)</em>.  For each of the 6 selected mycoplasma species (A. laidlawii, M. fermentans, M. hominis, M. hyorhinis, M. orale and M. arginini; also listed in the legend), we downloaded the 16S ribosomal RNA sequences. Indeed, according to the literature, 90% of the specific mycoplasma-mapped reads from human RNA-seq samples mapped to mycoplasma ribosomal RNA (<em>Olarerin-George et al. (2015)</em>)."
+      - "<strong>Specific k-mers quantification:</strong> specific k-mers were designed for each of 6 mycoplasma species’ rRNA sequences using Kmerator. Next, KmerExploR uses countTags to compute k-mer occurrences number in each RNA-seq sample and calculates the mean count value for each mycoplasma specie (Y axis, mean k-mer counts normalized per billion of k-mers)."
+      - "<strong>Threshold:</strong> the threshold is an indication: above it, we could consider the sample as contaminated by mycoplasms. "
+  Virus_genome:
+    sidenav: Virus
+    title: Virus detection
+    threshold: 1
+    chart_type: bar
+    chart_theme: light
+    desc:
+      - "Viruses contamination"
+      - "<strong>Predictor genes selection:</strong> viruses are a significant cause of human cancers. In a recent study, <em>Uphoff et al. (2019)</em> screened more than 300 Cancer Cell Line Encyclopedia RNA-seq and revealed 20 infected cell lines with different viruses. To rapidly explore the potential presence of viruses into RNA-seq datasets, we used the 14 viruses reference genomes described in <em>Uphoff et al.</em> Study. These viruses are listed in the legend."
+      - "<strong>Specific k-mers quantification and interpretation:</strong> we used Kmerator to select, for each virus, the k-mers absent from the human reference genome and transcriptome. Next, KmerExploR uses countTags to compute k-mer occurrences number in each RNA-seq sample and calculates the mean count value for each virus (Y axis, mean k-mer counts normalized per billion of k-mers). Using this quantification, we are able to highlight potential common viruses contamination."
+  #~ Telomeres:
+    #~ sidenav: Telomeres
+    #~ title: Telomeres detection
+    #~ threshold: 10
+    #~ chart_type: bar
+    #~ chart_theme: light
+    #~ desc:
+      #~ - "Telomeres"
+      #~ - ""
+      #~ - ""
+  Specie:
+    sidenav: Species
+    title: Ensembl species
+    as_percent: True
+    threshold:
+    chart_type: bar
+    chart_theme: light
+    desc:
+      - "Species"
+      - "<strong>Predictor genes selection:</strong> the probability of mixed cell lines in samples preparation, usage of polymerase chain reaction (PCR) which can accidentally amplify the wrong piece of DNA, plus an unknown probability of error in metadata assignation motivated us to check the species present in an RNA-seq sample. Based on several studies, the mitochondrially encoded cytochrome c oxidase I (MT-CO1) is a gene marker that could be sufficient for a quick check of the specie of an RNA-seq sample (<em>Hebert et al. (2003)</em>). Indeed, this gene is highly expressed and reference sequences from many distinct species are available. Thus, we selected the MT-CO1 gene from 10 different species. These species are listed in the legend."
+      - "<strong>Specific k-mers quantification:</strong> with Kmerator, we designed specific k-mers for each MT-CO1 ortholog, using the appropriate specie reference genome and transcriptome. Next, KmerExploR uses countTags to compute k-mer occurrences number in each RNA-seq sample and calculates the mean count value for each specie (Y axis, mean k-mer counts normalized per billion of k-mers). "

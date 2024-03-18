@@ -18,7 +18,7 @@
 ## Description
 
 
-From a bunch of fastq or countTags output files, KmerExploR provides information on RNA-sequencing datasets :
+From a bunch of fastq or countTags output files, by default, KmerExploR provides information on Human RNA-sequencing datasets :
 
 - wether the analysis is based on poly-A selection protocol or ribo-depletion,
 - whether the analysis is based on oriented or non-oriented sequencing, 
@@ -27,9 +27,11 @@ From a bunch of fastq or countTags output files, KmerExploR provides information
 - wether the data are contamined by HeLa, mycoplasma is present or not, or other viruses such as hepatitis B virus
 - specie
 
+Other type of information can be queried, using ``-l/--list`` then ``-b/--builtin-tags``.
+
 `KmerExploR` uses a set of reference specific kmers designed with Kmerator (https://github.com/Transipedia/kmerator).
 
-For general usage, we will use the provided set of kmers. Howerver, it is also possible to create your own kmers reference file to have specific informations on you samples such as request on a particular specie.
+For general usage, we will use one of the provided sets of tags. Howerver, it is also possible to create your own tags reference file to have specific informations on you samples such as request on a particular specie.
 
 This code is under **GPL3** licence.
 
@@ -54,7 +56,6 @@ We recommand tu use ``pip` as it install everything you need automatically.
 
 ### Option 1: install KmerExploR with pip
 
-
 ```
 pip install kmerexplor
 ```
@@ -73,22 +74,22 @@ sudo ln -s $PWD/kmerexplor/kmerexplor/core.py /usr/local/bin/kmerexplor
 ```
 
 
-
 ## Input
 
 
-**required:**
+**Required:**
 
 - fastq or outputs from countTags (gzipped or not). 
 
 For paired samples, fastq names must be in illumina format (`_R1_001` and `_R2_001`), or they must end by `_1.fastq[.gz]` and `2.fastq[.gz]`. `countTags` files must end by `tsv[.gz]`. `countTags` files can be aggregated in a single multi-culumn file.
 
-**optional:**
+**For advanced usage:**
 
-- yaml configuration file.
-- tags file.
+- tags file
+- yaml configuration file
+- markdown file (facultative)
 
-Both must match (see below).
+Both yaml and tags file must match (see below).
 
 
 ## Output
@@ -117,11 +118,9 @@ kmerexplor-results
 Without options or with `--help`, `KmerExploR` returns Help
 
 ```
-usage: kmerexplor [-h] (-s | -p) [-k <int>] [-K] [-d] [-o <output_dir>] 
-                  [--tmp-dir <tmp_dir>] [--config <file_name>] [-t <tag_file>] 
-                  [--dump-config [file_name]] [--show-tags]
-                  [--title <string>] [-y] [-c <int>] [-v]
-                  <file1> ... [<file1> ... ...]
+usage: kmerexplor-dev [-h] [-s] [-p] [-k <int>] [-K] [-d] [-b BUILTIN_TAGS] [-o <output_dir>] [--tmp-dir <tmp_dir>] [-C <file_name>] [-T <tag_file>] [-l]
+                      [--dump-config file_name] [--show-tags] [--title <string>] [-y] [-c <int>] [-v]
+                      [<file1> ... ...]
 
 positional arguments:
   <file1> ...           fastq or fastq.gz or tsv countTags output files.
@@ -134,6 +133,8 @@ optional arguments:
                         kmer size (default 31).
   -K, --keep-counts     keep countTags outputs.
   -d, --debug           debug.
+  -b BUILTIN_TAGS, --builtin-tags BUILTIN_TAGS
+                        Choose a kmer set between ['human-quality', 'rRNA'] (default: human-quality)
   -o <output_dir>, --output <output_dir>
                         output directory (default: "./kmerexplor-results").
   --tmp-dir <tmp_dir>   temporary files directory.
@@ -141,20 +142,19 @@ optional arguments:
   -y, --yes, --assume-yes
                         assume yes to all prompt answers.
   -c <int>, --cores <int>
-                        specify the number of files which can be processed 
-                        simultaneously by countTags. (default: 1). Valid when 
-                        inputs are fastq files.
+                        specify the number of files which can be processed simultaneously by countTags. (default: 1). Valid when inputs are fastq files.
   -v, --version         show program's version number and exit
 
 advanced features:
-  --config <file_name>  alternate config yaml file.
-  -t <tag_file>, --tags <tag_file>
-                        alternate tag file.
+  -C <file_name>, --config <file_name>
+                        alternate config yaml file. Used with '--tags' option
+  -T <tag_file>, --tags <tag_file>
+                        alternate tag file. Needs '--config' option
+  -l, --list-tagsets    List available kmer sets
 
 extra features:
-  --dump-config [file_name]
-                        dump builtin config file as specified name to current 
-                        directory and exit (default name: config.yaml).
+  --dump-config file_name
+                        dump builtin config file as specified name as yaml format and exit.
   --show-tags           print builtin categories and predictors and exit.
 
 ```
@@ -169,11 +169,14 @@ countTags outputs are located in a directory named `countTags`, located in `kmer
 
 If you want to run again KmerExploR with the same input dataset, you can directly use  this directory (`kmerexplor-results/countTags/*.tsv`). CountTags step will be bypassed which is saving a lot of time.
 
-### --tags tags_file
+### -b/--builtin-tags
 
-KmerExploR uses an internal default tag file. You can specify another tags file using `--tags` option with an alternate tags file (compressed or not).
+By default, the human-quality tag set is applied, alternatively, you can choose other.
+To help, ``-l/--list-tagsets`` displayed available tag sets.
 
-#### Tags file format
+### -T/--tags tags_file (advanced usage)
+
+KmerExploR uses an internal default tag file. You can specify your own tags file using `--tags` option with an alternate tags file (compressed or not).
 
 Tags file format is tabuled in 2 columns.
 
@@ -181,7 +184,6 @@ Tags file format is tabuled in 2 columns.
 - column 2 : description with dashes "-" are separator, The dashes are very important to define the structure.
 
 Example : 
-
 
 ```
 AACGCCGCGCGTGACAACAAGAAGACCAGGA Histone-H2AFJ-ENST00000501744.2.fa.kmer58
@@ -198,7 +200,7 @@ __Warning__ : `config.yaml` file must refer to the same categories than tags fil
 **Notice** : the description of a set of tags can can be displayed on the main home page by creating a markdown file of the same name, suffixed with ``.md`` (eg: my-tags.tsv -> my-tags.md).
 
 
-### --config config.yaml
+### -C/--config config.yaml
 
 Associated to the tags file, KmerExploR includes a configuration file. It is used to reference kmers by categories (ex: Orientation, Mycoplasma) and display some parameters for graphs. It is strongly linked to the tags file. 
 When you set your own tag file, you also have to specify you own matching config file.
@@ -235,7 +237,7 @@ __Nota:__ if you add `as_percent:` to a category (empty or not), results will be
 
 
 
-## Examples:
+## Some Examples:
 
 Mandatory: `-p` for paired-end or `-s` for single:
 
@@ -260,6 +262,15 @@ kmerexplor -p path/to/countTags/files/*.tsv
 
 ```
 kmerexplor -p -o output_dir --title 'Title in html page dir/*.fastq.gz'
+```
+
+Use an alternative tagset:
+
+```
+# display available tagsets
+kmerexplor --list-tagsets
+# run kmerexplor with alternative builtin tagset
+kmerexplor -p  path/to/*.fastq.gz -b mouse-quality
 ```
 
 Advanced: using your own tag file and associated config.yaml file:

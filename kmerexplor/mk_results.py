@@ -53,7 +53,7 @@ class HTML:
         self.args = args
         self.scripts_file = 'scripts.js'
         self.htmlfile = os.path.join(args.output, 'kmerexplor.html')
-        self.scale_factor = args.scale
+        # ~ self.scale_factor = args.scale
         self.config = config
         self.info = info
         self.tags_file_desc = tags_file_desc
@@ -192,7 +192,6 @@ class HTML:
                 ## number of seq_id per category
                 as_fastq = True if 'as_fastq' in conf else False
                 if as_fastq:
-                # ~ if categ == 'Orientation':
                     counts_set = self.counts.get_by_category(categ, mode='single')
                 else:
                     counts_set = self.counts.get_by_category(categ)
@@ -211,7 +210,7 @@ class HTML:
                     ## threshold
                     if 'as_percent' not in conf:
                         if isinstance(conf['threshold'], (int, float)):
-                            thd = str(conf['threshold'] * args.scale)
+                            thd = str(conf['threshold'])
                             threshold = "[{yAxis:" + "{},".format(thd) + "}],"
                         elif isinstance(conf['threshold'], str):
                             threshold = "["
@@ -247,7 +246,7 @@ class HTML:
                             thld = conf['threshold']
                             ### when threshold is single
                             if isinstance(thld, (int, float)):
-                                thld = conf['threshold'] * args.scale
+                                thld = conf['threshold']
                                 max_value = 0
                                 for counts in counts_set:
                                     ### positives values
@@ -431,8 +430,8 @@ class HTML:
         msg_info = []
         msg_info.append("<p>Mode: {}</p>".format(self.counts.mode))
         msg_info.append("<p>{} version: {}</p>".format(self.info.APPNAME, self.info.VERSION))
-        if args.scale != 1:
-            msg_info.append("<p>Scale: x{}</p>".format(args.scale))
+        # ~ if args.scale != 1:
+            # ~ msg_info.append("<p>Scale: x{}</p>".format(args.scale))
         msg_info.append("<details><p><summary>{} samples analysed</summary></p>".format(len(self.counts.samples)))
         msg_info.append("<p>{}</p></details>".format(" - ".join(self.counts.samples)))
 
@@ -461,11 +460,14 @@ class HTML:
 
         ### General description of kmerexplor (use markdown file or invite to set it)
         tags_desc = '<h3>Description</h3>'
-        tags_desc += f"<p>You can create a markdown file {self.tags_file_desc!r} to describe the tag set. It will be displayed here.</p>"
-        if os.path.isfile(self.tags_file_desc):
+        if self.tags_file_desc:
             with open(self.tags_file_desc) as f:
                 text = f.read()
                 tags_desc = markdown.markdown(text, extensions=['attr_list']).replace('\n', '').replace('"', "'")
+        else:
+            md_file = f"{os.path.splitext(args.setfiles['tags'].split('.gz')[0])[0]}.md"
+            tags_desc += (f"<p>You can create a markdown file <strong>{md_file}</strong> "
+                           "to describe the tag set. It will be displayed here.</p>")
         # build Javascript code to home page
         homejs = "\n// Home page\n"
         homejs += "function home() {\n"

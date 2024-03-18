@@ -53,7 +53,6 @@ class Counts:
         self.counts_files = counts_files
         self.args = args
         self.mode = 'single' if args.single else 'paired'
-        self.scale = args.scale
         ### Check counts files
         # self._check_count_files()
         ### Add entry for samples
@@ -80,7 +79,6 @@ class Counts:
 
     def _do_merge_counts(self, args):
         """ Function doc """
-        scale           = self.scale or 1
         tags            = self.tags
         pos             = 0         # position of first sample
         n_sample        = 0         # number of sample
@@ -117,7 +115,7 @@ class Counts:
                     ### Add count value
                     for ii, count in enumerate(seq_counts):
                         ### Store count
-                        tags['counts'][seq_type][seq_id]['single'][ii+pos] += float(count) * scale
+                        tags['counts'][seq_type][seq_id]['single'][ii+pos] += float(count)
                     ### Store number of counts for this seq_id
                     if pos == 0:
                         tags['counts'][seq_type][seq_id]['number_counts'] += 1
@@ -261,7 +259,7 @@ class Counts:
                 results.append((seq_id, counts))
             return results
         else:
-            errmsg = " Category warning: {}, defined in {}, not found in output countTags.\n".format(seq_type, self.args.config)
+            errmsg = f" Category warning: {categ!r}, defined in {self.args.config!r}, not found in output countTags.\n"
             print(errmsg)
             return None
 

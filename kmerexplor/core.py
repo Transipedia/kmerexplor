@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 """ Module Doc
 
 input:
@@ -21,7 +20,6 @@ output:
 
 import os
 import sys
-import argparse
 import multiprocessing
 # from functools import partial       # to send multiple arguments with pool.starmap
 import tempfile
@@ -30,13 +28,13 @@ import glob
 import subprocess
 import yaml
 
+import info
 from common import *
 import checkFile as cf
 import samples
 from counts import Counts
 from mk_results import TSV, HTML
-import info
-from opt_actions import DumpAction, ShowTagsAction
+from options import usage
 
 
 APPPATH = os.path.dirname(os.path.realpath(__file__))
@@ -46,8 +44,12 @@ def main():
     """ Handle keyboard interrupt commands and launch program """
     ### 1. Manage command line arguments
     args = usage()
+
     ### load config file
     config = config2dict(args)
+    if not config:
+        sys.exit(f"Config error: {fileset.config!r} seems to be empty")
+
     ### If "ctrl C" is set, quit after executing exit_gracefully function
     try:
         run(args, config)
@@ -55,14 +57,25 @@ def main():
         print(f"Process interrupted by user", file=sys.stderr)
         exit_gracefully(args)
 
+'''
+def get_user_config(args, fileset):
+    if args.config:
+        fileset.config = args.config
+        if args.tags:
+            fileset.tags = args.tags
+        desc = f"{args.tags[:-len(ext)]}md"
+        if os.path.isfile(desc):
+            fileset.desc = desc
+'''
 
 def config2dict(args):
     """ Load config yaml file as dict """
+    config_file = args.setfiles['config']
     try:
-        with open(args.config) as stream:
+        with open(config_file) as stream:
             return yaml.safe_load(stream)
     except FileNotFoundError:
-        sys.exit(f"Error: no such file or directory: {args.config!r}")
+        sys.exit(f"Error: no such file or directory: {config_file!r}")
     except yaml.scanner.ScannerError as err:
         sys.exit(f"Error {err}")
 
@@ -113,15 +126,15 @@ def run(args, config):
             sys.exit(exit_gracefully(args, files_type))
 
     ### 4. Handle tags
-    tags_file = get_tags_file(args)
-    tags_file_desc = f"{os.path.splitext(tags_file.rstrip('.gz'))[0]}.md"
+    # ~ tags_file = get_tags_file(args)
+    # ~ tags_file_desc = f"{os.path.splitext(tags_file.rstrip('.gz'))[0]}.md"
 
     ### 5. If input files are fastq, run countTags (Multiprocessed)
     if files_type == 'fastq':
         ### Compute countTags with multi processing (use --core to specify cores counts)
         sys.stdout.write("\n ✨✨ Starting countTags, please wait.\n\n")
         with multiprocessing.Pool(processes=nprocs) as pool:
-            results = pool.starmap_async(do_countTags, [(sample, tags_file, args) for sample in sample_list])
+            results = pool.starmap_async(do_countTags, [(sample, args) for sample in sample_list])
             results.wait()
         samples_path = [f for f in glob.glob("{}/*.tsv".format(args.counts_dir))]
     else:
@@ -135,7 +148,7 @@ def run(args, config):
     ### 7. Build results as html pages and tsv table
     sys.stdout.write("\n ✨✨ Build output html page.\n")
     table = TSV(counts, args)                                   # create TSV file
-    charts = HTML(counts, args, info, config, tags_file_desc)   # create résults in html format
+    charts = HTML(counts, args, info, config, args.setfiles['desc'])     # create results in html format
 
     ### 8. show results
     show_res(args,counts, table.tsvfile, charts.htmlfile, files_type)
@@ -159,15 +172,15 @@ def set_sample_list(files, args, files_type):
         return samples.find(files, args)
 
 
-def do_countTags(sample, tags_file, args):
+def do_countTags(sample, args):
     """ Compute countTags """
+    tags_file = args.setfiles['tags']
     countTag_cmd = '{0}/countTags --stranded --alltags --normalize --tag-names --merge-counts \
                     -b --merge-counts-colname {4} -k {1} \
                     --summary {5}/{4}.summary \
                     -i {2} {3} > {5}/{4}.tsv'.format(APPPATH, args.kmer_size, tags_file, sample[0],
                                                     ''.join(sample[1:]), args.counts_dir)
-    # ~ print(countTag_cmd)
-    if args.debug: print("{}: Start countTags processing.\n{}".format(sample[1], countTag_cmd))
+    if args.debug: print(f"{sample[1]}: Start countTags processing.\n{countTag_cmd}")
     os.popen(countTag_cmd).read()
     print("  {}: countTags processed.".format(''.join(sample[1:])))
 
@@ -183,137 +196,6 @@ def show_res(args, tags, tsvfile, htmlfile, files_type):
         subprocess.Popen(['x-www-browser', htmlfile])
     except:
         pass
-
-
-def usage():
-    """
-    Help function with argument parser.
-    """
-
-    ### Text at the end (command examples)
-    epilog  = ("Examples:\n"
-            "\n # Mandatory: -p for paired-end or -s for single:\n"
-            " %(prog)s -p path/to/*.fastq.gz\n"
-            "\n # -c for multithreading, -k to keep counts (input must be fastq):\n"
-            " %(prog)s -p -c 16 -k path/to/*.fastq.gz\n"
-            "\n # You can skip the counting step thanks to countTags output (see -k option):\n"
-            " %(prog)s -p path/to/countTags/files/*.tsv\n"
-            "\n # -o to choose your directory output (directory will be created),"
-            "\n # --title to show title in results:\n"
-            " %(prog)s -p -o output_dir --title 'Title displayed on the html page' dir/*.fastq.gz'\n"
-            "\n # Advanced: use your own tag file and config.yaml file:\n"
-            " %(prog)s -p --tags my_tags.tsv --config my_config.yaml dir/*.fast.gz\n"
-    )
-    ### Argparse
-    parser = argparse.ArgumentParser(epilog=epilog,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        # formatter_class=argparse.RawTextHelpFormatter,
-    )
-    method = parser.add_mutually_exclusive_group(required=True) # method = paired or single
-    advanced_group = parser.add_argument_group(title='advanced features')
-    special_group = parser.add_argument_group(title='extra features')
-    parser.add_argument('files',
-                        help='fastq or fastq.gz or tsv countTags output files.',
-                        nargs='+',
-                        default=sys.stdin,
-                        metavar=('<file1> ...'),
-    )
-    method.add_argument('-s', '--single',
-                        action='store_true',
-                        help='when samples are single.',
-    )
-    method.add_argument('-p', '--paired',
-                        action='store_true',
-                        help='when samples are paired.',
-    )
-    parser.add_argument('-k', '--kmer-size',
-                        type=int,
-                        help='kmer size (default 31).',
-                        default=31,
-                        metavar="<int>",
-    )
-    parser.add_argument('-K', '--keep-counts',
-                        action='store_true',
-                        help='keep countTags outputs.',
-    )
-    parser.add_argument('-d', '--debug',
-                        action='store_true',
-                        help='debug.',
-    )
-    ### Depreciated : hidden for the moment
-    parser.add_argument('-b', '--builtin-tags',
-                        help=argparse.SUPPRESS,
-                        default='human-quality',
-                        choices=[s for s in BUILTIN_TAGS],
-    )
-    parser.add_argument('-o', '--output',
-                        default='./{}-results'.format(info.APPNAME.lower()),
-                        help='output directory (default: "./{}-results").'.format(info.APPNAME.lower()),
-                        metavar='<output_dir>',
-    )
-    parser.add_argument('--tmp-dir',
-                        default='/tmp',
-                        help='temporary files directory.',
-                        metavar='<tmp_dir>',
-    )
-    ### Deprecated since countTags has the billiard option
-    parser.add_argument('--scale',
-                        default=1,
-                        type=int,
-                        help=argparse.SUPPRESS,
-                        # help='scale factor, to avoid too small values of counts. (default: 1).',
-                        metavar=('scale'),
-    )
-    advanced_group.add_argument('--config',
-                        default=os.path.join(APPPATH, "config.yaml"),
-                        help='alternate config yaml file.',
-                        metavar='<file_name>',
-    )
-    advanced_group.add_argument('-t', '--tags',
-                        help='alternate tag file.',
-                        metavar='<tag_file>',
-    )
-    advanced_group.add_argument('-a', '--add-tags',
-                        help=argparse.SUPPRESS, # 'additional tag file.',
-                        metavar='<tag_file>',
-    )
-    special_group.add_argument('--dump-config',
-                        action=DumpAction,
-                        arg='file',
-                        nargs='?',
-                        metavar='file_name',
-                        help='dump builtin config file as specified name to current directory and exit (default name: config.yaml).',
-    )
-    special_group.add_argument('--show-tags',
-                        action=ShowTagsAction,
-                        help='print builtin categories and predictors and exit.',
-                        nargs=0,
-    )
-    parser.add_argument('--title',
-                        default='',
-                        help='title to be displayed in the html page.',
-                        metavar="<string>"
-    )
-    parser.add_argument('-y', '--yes', '--assume-yes',
-                        action='store_true',
-                        help='assume yes to all prompt answers.',
-    )
-    parser.add_argument('-c', '--cores',
-                        default=1,
-                        type=int,
-                        help='specify the number of files which can be processed simultaneously' +
-                        ' by countTags. (default: 1). Valid when inputs are fastq files.',
-                        metavar=('<int>'),
-    )
-    parser.add_argument('-v', '--version',
-                        action='version',
-                        version='%(prog)s version: {}'.format(info.VERSION)
-    )
-    ### Go to "usage()" without arguments or stdin
-    if len(sys.argv) == 1 and sys.stdin.isatty():
-        parser.print_help()
-        sys.exit()
-    return parser.parse_args()
 
 
 if __name__ == "__main__":

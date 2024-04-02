@@ -6,21 +6,11 @@ import gzip
 
 
 import info
-# from opt_actions import DumpAction, ShowTagsAction, ListTagsetsAction
 from common import *
 
 APPPATH = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_TAGSET = "human-quality"
 
-
-"""
-ajouter les def :
- - dump_config()
- - show_tags()
- - list_tagsets
-contrôler que
- - qu'il y a '-s' OU '-p'
-"""
 
 def handle_args(args):
     ### check some args
@@ -40,6 +30,9 @@ def check_args(args):
         ### At least one fastq must be define
         if not args.files:
             sys.exit("Syntax error: the following arguments are required: <files1>")
+    ### output directory must be writable
+    if not os.access(os.path.dirname(os.path.abspath(args.output)), os.W_OK):
+        sys.exit(f"Permission denied: {os.path.dirname(os.path.abspath(args.output))}")
     ### Define user tagset tsv, config yaml, desc md and put them in args
     user_args_len = len([_ for _ in (args.config, args.tags) if _])
     if user_args_len == 2:

@@ -118,7 +118,7 @@ kmerexplor-results
 Without options or with `--help`, `KmerExploR` returns Help
 
 ```
-usage: kmerexplor-dev [-h] [-s] [-p] [-k <int>] [-K] [-d] [-b BUILTIN_TAGS] [-o <output_dir>] [--tmp-dir <tmp_dir>] [-C <file_name>] [-T <tag_file>] [-l]
+usage: kmerexplor [-h] [-s] [-p] [-k <int>] [-K] [-d] [-b BUILTIN_TAGS] [-o <output_dir>] [--tmp-dir <tmp_dir>] [-C <file_name>] [-T <tag_file>] [-l]
                       [--dump-config file_name] [--show-tags] [--title <string>] [-y] [-c <int>] [-v]
                       [<file1> ... ...]
 

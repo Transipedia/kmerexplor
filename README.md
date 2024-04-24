@@ -134,9 +134,10 @@ optional arguments:
   -K, --keep-counts     keep countTags outputs.
   -d, --debug           debug.
   -b BUILTIN_TAGS, --builtin-tags BUILTIN_TAGS
-                        Choose a kmer set between ['human-quality', 'rRNA'] (default: human-quality)
+                        Choose a kmer set between ['human-quality'] (default: human-quality)
   -o <output_dir>, --output <output_dir>
                         output directory (default: "./kmerexplor-results").
+  -l, --list-tagsets    List available kmer sets
   --tmp-dir <tmp_dir>   temporary files directory.
   --title <string>      title to be displayed in the html page.
   -y, --yes, --assume-yes
@@ -149,8 +150,8 @@ advanced features:
   -C <file_name>, --config <file_name>
                         alternate config yaml file. Used with '--tags' option
   -T <tag_file>, --tags <tag_file>
-                        alternate tag file. Needs '--config' option
-  -l, --list-tagsets    List available kmer sets
+                        alternate tag file. Could be fasta or tsv file (gzip or not). 
+                        Needs '--config' option
 
 extra features:
   --dump-config file_name
@@ -163,7 +164,7 @@ extra features:
 
 ### -k --keep-counts
 
-By default, `KmerExploR` deletes intermediate files, particularly countTags output (when input files are fastq files). You could keep countTags output files by using `--keep-counts`option. The location of the countTags output files will then be displayed on the standard output.
+By default, `KmerExploR` deletes intermediate files, particularly countTags output (when input files are fastq files). You could keep countTags output files by using `-K/--keep-counts`option. The location of the countTags output files will then be displayed on the standard output.
 
 countTags outputs are located in a directory named `countTags`, located in `kmerexplor-results` by default or specified by `-o` option.
 
@@ -176,28 +177,36 @@ To help, ``-l/--list-tagsets`` displayed available tag sets.
 
 ### -T/--tags tags_file (advanced usage)
 
-KmerExploR uses an internal default tag file. You can specify your own tags file using `--tags` option with an alternate tags file (compressed or not).
+KmerExploR uses an internal default tag file. You can specify your own tags file using `-T/--tags` option with an alternate tags file (compressed or not). It could be formated as tabuled (tsv) or fasta format
 
-Tags file format is tabuled in 2 columns.
 
-- column 1 : kmer sequence
-- column 2 : description with dashes "-" are separator, The dashes are very important to define the structure.
+#### how the tag file should be formatted ?
 
-Example : 
+Example using a tsv file :
 
 ```
-AACGCCGCGCGTGACAACAAGAAGACCAGGA Histone-H2AFJ-ENST00000501744.2.fa.kmer58
+AACGCCGCGCGTGACAACAAGAAGACCAGGA Histone-H2AFJ-unused
 ```
+
+Example using a fasta file
+
+```
+>Histone-H2AFJ-unused
+AACGCCGCGCGTGACAACAAGAAGACCAGGA
+```
+where:
 
 - `AACGCCGCGCGTGACAACAAGAAGACCAGGA` : kmer
 - `Histone` : category
 - `H2AFJ` : seq_id
-- `ENST00000501744.2.fa.kmer58` : seq_def (not used)
+- `unused` : for convenience, but not used by KmerExploR (facultative)
 
+
+__Warning__ : `seq_id` must be enclosed by dashes.
 
 __Warning__ : `config.yaml` file must refer to the same categories than tags file, otherwise KmerExploR does not display results (`Histone` in the example).
 
-**Notice** : the description of a set of tags can can be displayed on the main home page by creating a markdown file of the same name, suffixed with ``.md`` (eg: my-tags.tsv -> my-tags.md).
+**Notice** : the description of a set of tags can can be displayed on the main home page by creating a markdown file with the same name, but suffixed with ``.md`` (eg: my-tags.tsv -> my-tags.md).
 
 
 ### -C/--config config.yaml
@@ -276,6 +285,6 @@ kmerexplor -p  path/to/*.fastq.gz -b mouse-quality
 Advanced: using your own tag file and associated config.yaml file:
 
 ```
-kmerexplor -p -tags my_tags.tsv --config my_config.yaml dir/*.fast.gz
+kmerexplor -p --tags my_tags.tsv --config my_config.yaml dir/*.fast.gz
 ```
 

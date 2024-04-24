@@ -57,16 +57,6 @@ def main():
         print(f"Process interrupted by user", file=sys.stderr)
         exit_gracefully(args)
 
-'''
-def get_user_config(args, fileset):
-    if args.config:
-        fileset.config = args.config
-        if args.tags:
-            fileset.tags = args.tags
-        desc = f"{args.tags[:-len(ext)]}md"
-        if os.path.isfile(desc):
-            fileset.desc = desc
-'''
 
 def config2dict(args):
     """ Load config yaml file as dict """
@@ -84,6 +74,7 @@ def run(args, config):
     """ Function doc """
     nprocs, files = args.cores, args.files
     if args.debug: print("Arguments:", args)
+
     ### 1. Define some PATH
     # create directory for temporay files
     args.tmp_dir = tempfile.mkdtemp(prefix=info.APPNAME.lower() + "-", dir=args.tmp_dir)
@@ -125,11 +116,8 @@ def run(args, config):
             print("\n Error: no samples {} found\n".format('single' if args.single else 'paired'), file=sys.stderr)
             sys.exit(exit_gracefully(args, files_type))
 
-    ### 4. Handle tags
-    # ~ tags_file = get_tags_file(args)
-    # ~ tags_file_desc = f"{os.path.splitext(tags_file.rstrip('.gz'))[0]}.md"
 
-    ### 5. If input files are fastq, run countTags (Multiprocessed)
+    ### 4. If input files are fastq, run countTags (Multiprocessed)
     if files_type == 'fastq':
         ### Compute countTags with multi processing (use --core to specify cores counts)
         sys.stdout.write("\n ✨✨ Starting countTags, please wait.\n\n")
@@ -140,20 +128,20 @@ def run(args, config):
     else:
         samples_path = args.files
 
-    ### 6. merge countTags tables
+    ### 5. merge countTags tables
     sys.stdout.write("\n ✨✨ Starting merge of counts.\n")
     samples_path.sort()
     counts = Counts(samples_path, args)
 
-    ### 7. Build results as html pages and tsv table
+    ### 6. Build results as html pages and tsv table
     sys.stdout.write("\n ✨✨ Build output html page.\n")
     table = TSV(counts, args)                                   # create TSV file
     charts = HTML(counts, args, info, config, args.setfiles['desc'])     # create results in html format
 
-    ### 8. show results
+    ### 7. show results
     show_res(args,counts, table.tsvfile, charts.htmlfile, files_type)
 
-    ### 9. exit gracefully program
+    ### 8. exit gracefully program
     exit_gracefully(args, files_type)
 
 

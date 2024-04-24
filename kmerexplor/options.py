@@ -33,7 +33,7 @@ def check_args(args):
     ### output directory must be writable
     if not os.access(os.path.dirname(os.path.abspath(args.output)), os.W_OK):
         sys.exit(f"Permission denied: {os.path.dirname(os.path.abspath(args.output))}")
-    ### Define user tagset tsv, config yaml, desc md and put them in args
+    ### Define user tagset tsv/fasta, config yaml, desc md and put them in args
     user_args_len = len([_ for _ in (args.config, args.tags) if _])
     if user_args_len == 2:
         ### check file presences
@@ -53,16 +53,20 @@ def check_args(args):
 
 def _get_tagsets(args=None):
     basedir, subdirs, files = next(os.walk(os.path.join(APPPATH, 'tagsets')))
-    tagsets = []
+    tagsets = {}
     for file in files:
-        if file.endswith('tsv.gz'):
-            tagsets.append('.'.join(file.split('.')[:-2]))
-        elif file.endswith('tsv'):
-            tagsets.append('.'.join(file.split('.')[:-1]))
+        if file.endswith(('tsv.gz', 'fa.gz', 'fasta.gz')):
+            tagset = ('.'.join(file.split('.')[:-2]))
+            ext = '.'.join(file.split('.')[-2:])
+            tagsets[tagset] = ext
+        elif file.endswith(('tsv', 'fa', 'fasta')):
+            tagset = ('.'.join(file.split('.')[:-1]))
+            ext = '.'.join(file.split('.')[-1:])
+            tagsets[tagset] = ext
 
     ### return list of kmer sets
     if not args:
-        return tagsets
+        return list(tagsets.keys())
 
     ### Exit if kmer set files not found
     exit = lambda tagset, tagsets : sys.exit("kmer set '{}' not found, kmer sets available:\n - {}\n"
@@ -71,6 +75,7 @@ def _get_tagsets(args=None):
 
     ### find and return kmer set, yaml config and description file
     tagset = args.builtin_tags
+    ext = tagsets[tagset]
     def get_setfiles(tagset, ext):
             tag_file = os.path.join(basedir, f"{tagset}.{ext}")
             config_file = os.path.join(basedir, f"{tagset}.yaml")
@@ -79,11 +84,10 @@ def _get_tagsets(args=None):
                 exit(tagset, tagsets)
             if not os.path.isfile(desc_file):
                 desc_file = None
-            setfiles = {'tags':tag_file, 'config': config_file, 'desc': desc_file, 'ext': ext}
+            setfiles = {'tags':tag_file, 'config': config_file, 'desc': desc_file, 'ext': ext, 'tags_format': ext.rstrip('.gz')}
             return setfiles
-            # ~ return type('KmerFiles', (object,), setfiles)
 
-    ext = ('tsv.gz','tsv')[f"{tagset}.tsv" in files]
+    ### get chosen tagset
     setfiles = get_setfiles(tagset, ext)
     return setfiles
 
@@ -107,24 +111,37 @@ def _show_tags(args):
     categories = {}
     ### Define tag file.
     tags_file = args.tags or args.setfiles['tags']
+
+    ### is tag file gzipped ?
+    is_gz = _is_gz_file(tags_file)
+    ### is file formated as fasta or tsv ?
+    tag_format = _get_file_format(tags_file, is_gz)
     ### open tag file
     try:
-        if os.path.splitext(tags_file)[1] == '.gz':
+        if is_gz:
             fh = gzip.open(tags_file, 'rt')
         else:
             fh = open(tags_file)
     except FileNotFoundError as err:
         sys.exit(f"Error: file {tags_file!r} not found")
     ### Extract categories and predictors
-    for line in fh:
-        try:
-            category, predictor = line.split('\t')[1].split('-')[:2]
-        except IndexError:
-            sys.exit(f"Error: file '{tags_file!r}' malformated (show format of tag file).")
-        if not category in categories:
-            categories[category] = {predictor}
-        else:
-            categories[category].add(predictor)
+    if tag_format == 'tsv':
+        for line in fh:
+            try:
+                category, predictor = line.split('\t')[1].split('-')[:2]
+                categories.setdefault(category, set()).add(predictor)
+            except IndexError:
+                sys.exit(f"Error: file '{tags_file!r}' malformated (show format of tag file).")
+    if tag_format == 'fasta':
+        for line in fh:
+            try:
+                if line.startswith('>'):
+                    category, predictor = line[1:].rstrip().split('-')[:2]
+                    categories.setdefault(category, set()).add(predictor)
+            except IndexError:
+                sys.exit(f"Error: file '{tags_file!r}' malformated (show format of tag file).")
+
+
 
     ### Display categories and predictors
     for categ,predictors in categories.items():
@@ -142,6 +159,23 @@ def _list_tagsets(args):
     print("Buitin tag set (to use with -b/--builtin-tags):")
     print(" - {}\nDefault: human-quality".format('\n - '.join(_get_tagsets())))
     sys.exit()
+
+
+def _is_gz_file(file):
+    with open(file, 'rb') as test_f:
+        return test_f.read(2) == b'\x1f\x8b'
+
+
+def _get_file_format(file, gz=False):
+    ### Is tag file a fasta or a tsv
+    if gz:
+        with gzip.open(file, 'rt') as fh:
+            format = 'fasta' if fh.readline().startswith('>') else 'tsv'
+    else:
+        with open(file) as fh:
+            format = 'fasta' if fh.readline().startswith('>') else 'tsv'
+    return format
+
 
 
 def usage():
@@ -221,7 +255,8 @@ def usage():
                         metavar='<file_name>',
     )
     advanced_group.add_argument('-T', '--tags',
-                        help="alternate tag file. Needs '--config' option",
+                        help=("alternate tag file. Could be fasta or tsv file (gzip or not)."
+                              " Needs '--config' option"),
                         metavar='<tag_file>',
     )
     ### Not implemented yet: hidden

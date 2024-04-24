@@ -101,7 +101,6 @@ class Counts:
                 for tagname in tagnames:
                     try:
                         seq_type, seq_id = tagname.split('-')[:2]
-                        # ~ seq_id = tagname.split('-')[1]
                         seq_counts = row[2:]
                     except IndexError:
                         sys.exit(f"\n IndexError: missing at least one field in '{file}' file (2 fields expected, hyphen separated).")

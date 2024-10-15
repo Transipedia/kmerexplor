@@ -81,7 +81,7 @@ sudo ln -s $PWD/kmerexplor/kmerexplor/core.py /usr/local/bin/kmerexplor
 
 - fastq or outputs from countTags (gzipped or not). 
 
-For paired samples, fastq names must be in illumina format (`_R1_001` and `_R2_001`), or they must end by `_1.fastq[.gz]` and `2.fastq[.gz]`. `countTags` files must end by `tsv[.gz]`. `countTags` files can be aggregated in a single multi-culumn file.
+For paired samples, fastq names must be in illumina format (`_R1_001` and `_R2_001`), otherwise they must end by `_1.fastq[.gz]` and `_2.fastq[.gz]` or `_R1.fastq[.gz]` and `_R2.fastq[.gz]`. `countTags` files must end by `tsv[.gz]`. `countTags` files can be aggregated in a single multi-culumn file.
 
 **For advanced usage:**
 

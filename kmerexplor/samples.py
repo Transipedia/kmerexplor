@@ -11,6 +11,7 @@ import re
 
 TAGS = [
     ('_R1_001', '_R2_001', 'illumina'),
+    ('_R1.fastq', '_R2.fastq', 'illumina simplified'),
     ('_1.fastq', '_2.fastq', 'bio2m'),
     ('_1.fq', '_2.fq', 'other'),
     ('_1.tsv', '_2.tsv', 'countTags'),

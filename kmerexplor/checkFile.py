@@ -53,6 +53,10 @@ class File:
             with open(self.file) as stream:
                 for _ in range(3):
                     ftl.append(stream.readline())
+        except Exception as err:
+            # ~ print(f"{self.file} : ERROR: {err}")
+            self.errmsg = f"Error: {err} ({self.file})"
+            return False, None
         ### check content of file
         if not self.errmsg:
             try:

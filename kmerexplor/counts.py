@@ -59,8 +59,10 @@ class Counts:
         self._get_samples_names()
         ### merge tags
         self.tags = self._do_merge_counts(args)
+        # ~ print('tag rRNA_all-RNA5_8SN5',self.tags['counts']['rRNA_all']['RNA5_8SN5']['single'][6])    # TO DEL
         ### compute mean of counts
         self._set_counts_mean()
+        # ~ print('tag rRNA_all-RNA5_8SN5',self.tags['counts']['rRNA_all']['RNA5_8SN5']['single'][6])    # TO DEL
         ### if paired samples, add dict entry with sum for foward and reverse
         if self.mode == 'paired':
             self._match_paired()
@@ -87,13 +89,12 @@ class Counts:
                 fh = gzip.open(file, 'tr')
             else:
                 fh = open(file)
+            ### Avoid first line in counts and define counts pos
+            header = fh.readline()
+            pos += n_sample
+            n_sample = len(header.split()[2:])
             ### Add data
             for row in fh:
-                ### Avoid first line in counts and define counts pos
-                if row[0:4] == 'tag\t':
-                    pos += n_sample
-                    n_sample = len(row.split()[2:])
-                    continue
                 ### split line
                 row = row.rstrip().split('\t')
                 ### The kmer can be representative of several tag names (seq-type + seq-id + queue)
@@ -111,15 +112,13 @@ class Counts:
                     if not seq_id in tags['counts'][seq_type]:
                         tags['counts'][seq_type][seq_id] = {'single':[0 for _ in range(len(self.tags['samples']['single']))]}
                         tags['counts'][seq_type][seq_id]['number_counts'] = 0       # number of counts per seq_id
-                    ### Add count value
+                    ### Store count value
                     for ii, count in enumerate(seq_counts):
-                        ### Store count
                         tags['counts'][seq_type][seq_id]['single'][ii+pos] += float(count)
                     ### Store number of counts for this seq_id
                     if pos == 0:
                         tags['counts'][seq_type][seq_id]['number_counts'] += 1
             fh.close()
-
         ### if first sample, add rows counts in metadata, verify if same count for others samples
         nrows = 0
         for idx,seq_type in enumerate(tags['counts']):

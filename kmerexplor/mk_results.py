@@ -198,64 +198,64 @@ class HTML:
                     else:
                         counts_set.sort()
                     nb_categ = nb_legend = len(counts_set)
-                    ### special case: category
+                    ### special case: show all fastq instead of sample (category Orientation)
                     if as_fastq:
-                    # ~ if categ == 'Orientation':
                         nb_legend //= 4
-                    ## threshold
-                    if 'as_percent' not in conf:
-                        if isinstance(conf['threshold'], (int, float)):
-                            thd = str(conf['threshold'])
-                            threshold = "[{yAxis:" + "{},".format(thd) + "}],"
-                        elif isinstance(conf['threshold'], str):
-                            threshold = "["
-                            thresholds = conf['threshold'].split(",")
-                            for thd in thresholds:
-                                thd = str(float(thd) * args.scale)
-                                threshold += "{yAxis:" + thd + "},"
-                            threshold += "],"
-                        elif not conf['threshold']:
-                            threshold = 'false,'
+                    ## thresholds
+                    if conf.get('thresholds') and not conf.get('as_percent'):
+                        thresholds = "["
+                        for value, name in conf['thresholds'].items():
+                            thresholds += f"{{yAxis: {value}"
+                            formatter = name or 'threshold'
+                            thresholds += f", label: {{formatter: '{formatter}'}}}},"
+                        thresholds += "],"
                     else:
-                        threshold = 'false,'
+                        thresholds = 'false,'
                     ## Magical formula to compute height space for legend (depend of number of sequences id)
                     grid_top = 14 + nb_legend * 5 // 11
-                    ### Define Dataset
+                    
+                    ### DEFINE DATASET
                     lblank = " " * 16
                     dataset = ""
-                    if threshold != 'false,':
+                    if thresholds != 'false,':
                         dataset += '{}[],\n'.format(lblank)
-                    ## populate Dataset
+                    ## POPULATE DATASET
                     for seq_id in counts_set:
                         gene, counts = seq_id[:]
                         if gene[-4:] == '_rev':
                             dataset += "{}['{}', {}],\n".format(lblank, gene[:-4], ", ".join([str(-count) for count in counts]))
                         else:
                             dataset += "{}['{}', {}],\n".format(lblank, gene, ", ".join([str(count) for count in counts]))
-                    ### Define max Y axys
-                    yAxys_max = 'null'
+
+                    ### DEFINE MAX and MIN Y Axys
+                    yAxys_max = yAxys_min ='null'
                     ### when as_percent is set, Y axys max = 100
                     if 'as_percent' in conf:
                         yAxys_max = '100'
-                    elif conf['threshold']:
-                            thld = conf['threshold']
-                            ### when threshold is single
-                            if isinstance(thld, (int, float)):
-                                thld = conf['threshold']
-                                max_value = 0
-                                for counts in counts_set:
-                                    ### positives values
-                                    if thld > 0:
-                                        max_value = max(sum(counts[1]), max_value)
-                                    if thld < 0:
-                                    ### negatives values
-                                        max_value = min(sum(counts[1]), max_value)
-                                if thld > max_value:
-                                    yAxys_max = str(thld)
-                            ### When multiple threshold
-                            elif isinstance(conf['threshold'], str):
-                                ### yaxis max for mutlitple threshold is not managed at this time.
-                                pass
+                    elif conf.get('thresholds'):
+                        ### Notice that thresholds are not managed when 'as_percent' is set
+                        
+                        ### zip the counter
+                        genes = [ i[0] for i in counts_set ]
+                        zip_counter = [ list(i) for i in  zip(*[l[1] for l in counts_set]) ]
+                        
+                        for threshold in conf['thresholds']:
+                            max_count = min_count = 0
+                            for i,counts in enumerate(zip_counter):
+                                if genes[i].endswith('_rev'):
+                                    min_count = -max(sum(counts), min_count)
+                                else:
+                                    max_count = max(sum(counts), max_count)
+                                
+                            thd_min = min(conf['thresholds'])
+                            thd_max = max(conf['thresholds'])
+                            
+                        ### set yAxis_min/yAxis_max if the threshold is over than max/min count
+                        if thd_max > max_count:
+                            yAxys_max = thd_max
+                        if thd_min < min_count:
+                            yAxys_min = thd_min
+
 
                     ### Define description/explanation of category
                     if conf["desc"]:
@@ -269,8 +269,9 @@ class HTML:
                     variables_js += "{\n"
                     variables_js += "    chart_type: '{}',\n".format(conf['chart_type'])
                     variables_js += "    theme: '{}',\n".format(conf['chart_theme'])
-                    variables_js += "    threshold: {}\n".format(threshold)
+                    variables_js += "    threshold_data: {}\n".format(thresholds)
                     variables_js += "    yAxis_max: {},\n".format(yAxys_max)
+                    variables_js += "    yAxis_min: {},\n".format(yAxys_min)
                     variables_js += "    toolbox_type: ['stack', 'tiled'],\n"
                     variables_js += '    title_text: "{}",\n'.format(conf['title'])
                     variables_js += '    show_fastq: {},\n'.format('true' if as_fastq else 'false')
@@ -284,7 +285,6 @@ class HTML:
                     variables_js += "{}".format(desc)
                     variables_js += "    ]\n"
                     variables_js += "};\n\n"
-
         ### write javascript code
         dest = os.path.join(self.tree_dir, self.scripts_file)
         with open(dest, 'a') as file:
@@ -305,8 +305,8 @@ class HTML:
         chartjs += "    };\n"
         chartjs += "    /* Build series Object for chartjs() */\n"
         chartjs += "    series = [];\n"
-        chartjs += "    if (category.threshold) {\n"
-        chartjs += "        series.push({type: 'line', seriesLayoutBy: 'row', markLine: {symbol: 'none', label: {show: true,formatter: 'Threshold'},lineStyle: {width: 2, opacity: 0.6}, data: category.threshold}});\n"
+        chartjs += "    if (category.threshold_data) {\n"
+        chartjs += "        series.push({type: 'line', seriesLayoutBy: 'row', markLine: {symbol: 'none', lineStyle: {width: 2, opacity: 0.6}, data: category.threshold_data}});\n"
         chartjs += "    };\n"
         chartjs += "    for (i=0, c=category.nb_seqId; i<c; i++) {\n"
         chartjs += "        series.push({type: category.chart_type, stack: category.stack, seriesLayoutBy: 'row'});\n"
@@ -387,6 +387,7 @@ class HTML:
         chartjs += "            nameGap: 80,\n"
         chartjs += "            nameTextStyle: {fontSize: 16,},\n"
         chartjs += "            max: category.yAxis_max,\n"
+        chartjs += "            min: category.yAxis_min,\n"        
         chartjs += "        },\n"
         chartjs += "        series: series,\n"
         chartjs += "    };\n"

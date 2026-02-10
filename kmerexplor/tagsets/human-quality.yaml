@@ -1,21 +1,26 @@
 ### config.yaml: parameters to display results in HTML page.
-Basic_features:   # Meta category, show in left sidenav (underscores are replaced by blank)
-  Histones:       # Must match with first item (characters before first dash) of the second column
-                  # in the tabuled index file. Also, they will be used for Javascript function names.
-                  # They must be unique, and contain uniquely letters, digits and underscores
+Basic_features:   ## Meta category, show in left sidenav (underscores are replaced by blank)
+  Histones:       ## Must match with first item (characters before first dash) of the second column
+                  ## in the tabuled index file. Also, they will be used for Javascript function names.
+                  ## They must be unique, and contain uniquely letters, digits and underscores
     sidenav : Poly A / Ribo D
-                  # Show in the left sidebar
+                  ## Show in the left sidebar
     title: Poly A and Ribo depletion by Histone detection
-                  # Title of the graph
-    threshold: 200
-                  # 2 values separated by commas are admitted (e.g. threshold: 120, -120).
+                  ## Title of the graph
+    thresholds: 
+      # -100: Lower
+      # 300: Upper
+      # 150: 
+                  ## Multiples thresholds are allowed
+                  ## - 100: bad => -100: good
+                  ## If no name is entered, 'threshold' is displayed
     chart_type: bar
-                  # Only bar is admitted at this time.
-    # as_percent: # decomment to show result as percentage (show Gender).
-    #~ as_fastq:  # if decommented, each fastq file is showed instead sample (show Orientation).
+                  ## Only bar is admitted at this time.
+    # as_percent: ## decomment to show result as percentage (show Gender).
+    # as_fastq:   ## if decommented, each fastq file is showed instead sample (show Orientation).
     chart_theme: light
-                  # light, dark, or nothing (default theme: nothing)
-    desc:         # More details on the graph, located under it
+                  ## light, dark, or nothing (default theme: nothing)
+    desc:         ## More details on the graph, located under it
       - "Poly A selection" # first line is a title
       - "<strong>Predictor genes selection:</strong> when total RNA is extracted from a human sample, the most abundant component is ribosomal RNA (rRNA, 80 to 90%, <em>O'Neil et al. (2013)</em>), which must be removed to measure gene/transcript abundances using RNA-seq technology. Commonly used protocols to remove rRNA are polyadenylated mRNA selection (polyA+) and ribo-depletion (Ribo-Zero). To differentiate these 2 protocols, we selected widely expressed histone genes which produce non-polyadenylated transcripts barely detected into polyA+ RNA-seq. These predictor genes are listed in the legend."
       - "<strong>Specific k-mers quantification:</strong> several specific k-mers designed with Kmerator are associated to each selected histone gene. KmerExploR uses countTags to compute k-mer occurrences number in each RNA-seq sample and calculates the mean count value for each gene (Y axis, mean k-mer counts normalized per billion of k-mers)."
@@ -23,7 +28,7 @@ Basic_features:   # Meta category, show in left sidenav (underscores are replace
   Orientation:
     sidenav: Orientation
     title: Orientation
-    threshold: # 230, -230
+    thresholds: 
     as_fastq:
     chart_type: bar
     chart_theme: light
@@ -34,7 +39,8 @@ Basic_features:   # Meta category, show in left sidenav (underscores are replace
   Gender:
     sidenav: Y chromosome
     title: Y chromosome detection
-    threshold: 5
+    thresholds: 
+      5:
     chart_type: bar
     chart_theme: light
     desc:
@@ -44,7 +50,7 @@ Basic_features:   # Meta category, show in left sidenav (underscores are replace
   Read_biases:
     sidenav: Read position biases
     title: Read position biases
-    threshold:
+    thresholds:
     chart_type: bar
     chart_theme: light
     as_percent:
@@ -57,7 +63,8 @@ Contamination:
   HeLa_HPV18:
     sidenav: HeLa
     title: Hela HPV18
-    threshold: 10
+    thresholds: 
+      10:
     chart_type: bar
     chart_theme: light
     desc:
@@ -67,7 +74,8 @@ Contamination:
   Mycoplasma:
     sidenav: Mycoplasma
     title: Mycoplasma
-    threshold: 20
+    thresholds: 
+      20:
     chart_type: bar
     chart_theme: light
     desc:
@@ -78,7 +86,8 @@ Contamination:
   Virus_genome:
     sidenav: Virus
     title: Virus detection
-    threshold: 1
+    thresholds: 
+      80:
     chart_type: bar
     chart_theme: light
     desc:
@@ -88,7 +97,8 @@ Contamination:
   #~ Telomeres:
     #~ sidenav: Telomeres
     #~ title: Telomeres detection
-    #~ threshold: 10
+    #~ threshold: 
+      #~ 10:
     #~ chart_type: bar
     #~ chart_theme: light
     #~ desc:
@@ -99,7 +109,7 @@ Contamination:
     sidenav: Species
     title: Ensembl species
     as_percent: True
-    threshold:
+    thresholds:
     chart_type: bar
     chart_theme: light
     desc:

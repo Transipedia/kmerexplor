@@ -131,7 +131,7 @@ def run(args, config):
     ### 5. merge countTags tables
     sys.stdout.write("\n ✨✨ Starting merge of counts.\n")
     samples_path.sort()
-    counts = Counts(samples_path, args)
+    counts = Counts(samples_path, args, config)
 
     ### 6. Build results as html pages and tsv table
     sys.stdout.write("\n ✨✨ Build output html page.\n")

@@ -223,9 +223,8 @@ class HTML:
                     for seq_id in counts_set:
                         gene, counts = seq_id[:]
                         if gene[-4:] == '_rev':
-                            dataset += "{}['{}', {}],\n".format(lblank, gene[:-4], ", ".join([str(-count) for count in counts]))
-                        else:
-                            dataset += "{}['{}', {}],\n".format(lblank, gene, ", ".join([str(count) for count in counts]))
+                            gene = gene[-4:]
+                        dataset += "{}['{}', {}],\n".format(lblank, gene, ", ".join([str(count) for count in counts]))
 
                     ### DEFINE MAX and MIN Y Axys
                     yAxys_max = yAxys_min ='null'
@@ -237,15 +236,14 @@ class HTML:
                         
                         ### zip the counter
                         genes = [ i[0] for i in counts_set ]
-                        zip_counter = [ list(i) for i in  zip(*[l[1] for l in counts_set]) ]
-                        
+                        zip_counter_pos = [ list(i) for i in  zip(*[l[1] for l in counts_set if l[-4:] != '_rev' ]) ]
+                        zip_counter_neg = [ list(i) for i in  zip(*[l[1] for l in counts_set if l[-4:] == '_rev' ]) ]
                         for threshold in conf['thresholds']:
                             max_count = min_count = 0
-                            for i,counts in enumerate(zip_counter):
-                                if genes[i].endswith('_rev'):
-                                    min_count = -max(sum(counts), min_count)
-                                else:
-                                    max_count = max(sum(counts), max_count)
+                            for i,counts in enumerate(zip_counter_pos):
+                                max_count = max(sum(counts), max_count)
+                            for i,counts in enumerate(zip_counter_neg):
+                                min_count = min(sum(counts), min_count)
                                 
                             thd_min = min(conf['thresholds'])
                             thd_max = max(conf['thresholds'])

@@ -47,12 +47,13 @@ class Counts:
     Create a dictionay of tags
     """
 
-    def __init__(self, counts_files, args):
+    def __init__(self, counts_files, args, config):
         """ Class initialiser """
         self.tags = {'samples': {}, 'counts': {}, 'meta': {}}
         self.counts_files = counts_files
         self.args = args
         self.mode = 'single' if args.single else 'paired'
+        self.config = config
         ### Check counts files
         # self._check_count_files()
         ### Add entry for samples
@@ -165,13 +166,24 @@ class Counts:
 
 
     def _set_counts_mean(self):
-        """ Compute average for each count """
+        """ Compute average (or sum) for each count """
         for seq_type in self.tags['counts']:
+            
+            ### Determine if "as_sum" (in config.yaml) is set for this seq_type 
+            sum = False
+            for meta, categs in self.config.items():
+                if seq_type in categs and "as_sum" in self.config[meta][seq_type]:
+                    sum = True
+            
+            ### average (or sum) of the counts
             for seq_id in self.tags['counts'][seq_type]:
                 counts = self.tags['counts'][seq_type][seq_id]['single']
                 ncounts = self.tags['counts'][seq_type][seq_id]['number_counts']
                 for i,count in enumerate(counts):
-                    self.tags['counts'][seq_type][seq_id]['single'][i] = count / ncounts
+                    if sum:
+                        self.tags['counts'][seq_type][seq_id]['single'][i] = count
+                    else:
+                        self.tags['counts'][seq_type][seq_id]['single'][i] = count / ncounts
 
 
     def _match_paired(self):
@@ -254,6 +266,8 @@ class Counts:
         if categ in self.tags['counts']:
             for seq_id in self.tags['counts'][categ]:
                 counts = self.tags['counts'][categ][seq_id][mode]
+                if seq_id[-4:] == '_rev':
+                    counts = [-c for c in counts]
                 results.append((seq_id, counts))
             return results
         else:

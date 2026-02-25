@@ -17,7 +17,8 @@ Basic_features:   ## Meta category, show in left sidenav (underscores are replac
     chart_type: bar
                   ## Only bar is admitted at this time.
     # as_percent: ## decomment to show result as percentage (show Gender).
-    # as_fastq:   ## if decommented, each fastq file is showed instead sample (show Orientation).
+    # as_sum:      ## By default, kmer counts are averaged. By uncommenting, they will be summed.
+    # as_fastq:   ## if uncommented, each fastq file is showed instead sample (show Orientation).
     chart_theme: light
                   ## light, dark, or nothing (default theme: nothing)
     desc:         ## More details on the graph, located under it

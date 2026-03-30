@@ -1,3 +1,8 @@
+[![Contact](https://img.shields.io/badge/Contact-Camelia_Sennaoui-lightgreen)](mailto:camelia.sennaoui@umontpellier.fr)
+[![Contact](https://img.shields.io/badge/Contact-Chloe_Bessière-lightgreen)](mailto:chloé.bessiere@inserm.fr)
+[![Contact](https://img.shields.io/badge/Contact-Anthony_Boureux-lightgreen)](mailto:anthony.boureux@inserm.fr)
+
+
 # KmerExploR
 
 

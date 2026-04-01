@@ -16,6 +16,7 @@
 - [Usage](#usage)
 - [Options](#options)
 	- [-k --keep-counts](#-k---keep-counts)
+	- [-b --builtin-tags tags_set](#-b/--builtin-tags)
 	- [--tags tags_file](#--tags-tags_file)
 	- [--config config.yaml](#config-config.yaml)
 
@@ -28,15 +29,15 @@ From a bunch of fastq or countTags output files, by default, KmerExploR provides
 - wether the analysis is based on poly-A selection protocol or ribo-depletion,
 - whether the analysis is based on oriented or non-oriented sequencing, 
 - gender, 
-- whether there is a read coverage bias from 5' to 3' 	long transcripts
-- wether the data are contamined by HeLa, mycoplasma is present or not, or other viruses such as hepatitis B virus
+- whether there is a read coverage bias from 5' to 3' along transcripts
+- whether the data are contamined by HeLa, mycoplasma is present or not, or other viruses such as hepatitis B virus
 - specie
 
-Other type of information can be queried, using ``-l/--list`` then ``-b/--builtin-tags``.
+Other type of information can be queried, using ``-l/--list`` then ``-b/--builtin-tags [tags_set]``.
 
 `KmerExploR` uses a set of reference specific kmers designed with Kmerator (https://github.com/Transipedia/kmerator).
 
-For general usage, we will use one of the provided sets of tags. Howerver, it is also possible to create your own tags reference file to have specific informations on you samples such as request on a particular specie.
+For general usage, we will use one of the provided set of tags. Howerver, it is also possible to create your own tags reference file to have specific informations on your samples such as request on a particular specie.
 
 This code is under **GPL3** licence.
 
@@ -177,12 +178,12 @@ If you want to run again KmerExploR with the same input dataset, you can directl
 
 ### -b/--builtin-tags
 
-By default, the human-quality tag set is applied, alternatively, you can choose other.
-To help, ``-l/--list-tagsets`` displayed available tag sets.
+By default, the human-quality tag set is applied, alternatively, you can choose another one.
+To help, ``-l/--list-tagsets`` display all available tag sets.
 
 ### -T/--tags tags_file (advanced usage)
 
-KmerExploR uses an internal default tag file. You can specify your own tags file using `-T/--tags` option with an alternate tags file (compressed or not). It could be formated as tabuled (tsv) or fasta format
+KmerExploR uses an internal default tag file. You can specify your own tags file using `-T/--tags` option with an alternate tags file (compressed or not). It could be formated as tabuled (tsv) or fasta format.
 
 
 #### how the tag file should be formatted ?
@@ -211,7 +212,7 @@ __Warning__ : `seq_id` must be enclosed by dashes.
 
 __Warning__ : `config.yaml` file must refer to the same categories than tags file, otherwise KmerExploR does not display results (`Histone` in the example).
 
-**Notice** : the description of a set of tags can can be displayed on the main home page by creating a markdown file with the same name, but suffixed with ``.md`` (eg: my-tags.tsv -> my-tags.md).
+**Notice** : the description of a set of tags can be displayed on the main home page by creating a markdown file with the same name, but suffixed with ``.md`` (eg: my-tags.tsv -> my-tags.md).
 
 
 ### -C/--config config.yaml
@@ -219,7 +220,7 @@ __Warning__ : `config.yaml` file must refer to the same categories than tags fil
 Associated to the tags file, KmerExploR includes a configuration file. It is used to reference kmers by categories (ex: Orientation, Mycoplasma) and display some parameters for graphs. It is strongly linked to the tags file. 
 When you set your own tag file, you also have to specify you own matching config file.
  
- Example for one categorie : 
+ Example for one category : 
  
 
 ```

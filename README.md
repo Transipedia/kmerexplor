@@ -15,10 +15,10 @@
 - [Examples](#examples)
 - [Usage](#usage)
 - [Options](#options)
-	- [-k --keep-counts](#-k---keep-counts)
-	- [-b --builtin-tags tags_set](#-b/--builtin-tags)
+	- [--keep-counts](#-k---keep-counts)
+	- [--builtin-tags tags_set](#-b--builtin-tags)
 	- [--tags tags_file](#--tags-tags_file)
-	- [--config config.yaml](#config-config.yaml)
+	- [--config config.yaml](#-c--config-configyaml)
 
 
 ## Description
